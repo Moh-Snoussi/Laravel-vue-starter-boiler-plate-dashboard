@@ -12,6 +12,8 @@ the front end is with vuejs its entry point is on resources/views/welcome.blade.
 
 to install execute the following commands get the data on your mahine #git clone https://github.com/Moh-Snoussi/Automated_Teller_Machine
 
+#cd Automated_Teller_Machine
+
 install php dependencies #composer install
 
 install java-script dependencies (node) #npm install
@@ -29,3 +31,5 @@ then run the following commands:
 #php artisan migrate:fresh
 
 #php artisan passport:instal
+finaly
+#php artisan serve
