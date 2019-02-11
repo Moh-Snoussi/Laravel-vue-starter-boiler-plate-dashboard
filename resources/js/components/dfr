@@ -1,0 +1,160 @@
+<template>
+<mdb-container>
+<mdb-row>
+  
+  <mdb-col md="6">
+    
+    <h2 style="margin-top:3rem;" class="secondary-heading mb-3">Log in</h2>
+    <p>{{ message }}</p>
+         </mdb-col>
+  
+        <mdb-col md="6" class="align-self-end">
+    <section class="preview" style="margin-top:3rem;">
+      <div class="alert alert-danger" v-if="error && !success">
+        <p>There was an error, unable to complete registration.</p>
+      </div>
+      <div class="alert alert-success" v-if="success">
+        <p>{{ message }}</p>
+      </div>
+
+      <form autocomplete="off" v-if="!success" method="post" novalidate @submit="checkForm">
+              <div style="margin-top:3rem;">
+          <mdb-input id="CARD_NUMBER" v-model="CARD_NUMBER" required type="text" label="Card number"/>
+          <span class="help-block" v-if="errors.CARD_NUMBER">{{ errors.CARD_NUMBER }}</span>
+        </div>
+
+        <div style="margin-top:3rem;max-width:20rem">
+          <mdb-input
+            type="text"
+            label="Pin"
+            id="PIN"
+            v-model="PIN"
+            required
+          />
+          <span class="help-block" v-if="errors.PIN">{{ errors.PIN }}</span>
+        </div>
+        <div class="text-center mt-5">
+          <mdb-btn block id="registerbutton" color="primary" size="lg">
+            <div v-if="!isloading" id="register">REGISTER</div>
+            <object v-if="isloading" id="loader" data="svg/tail-spin.svg"></object>
+          </mdb-btn>
+        </div>
+      </form>
+      <div class="text-center mt-5">
+        <mdb-btn
+          href="provider/login/google"
+          id="registerbutton"
+          color="secondary"
+          
+          block
+        >Register with Google</mdb-btn>
+        
+        <mdb-btn
+          href="provider/login/facebook"
+          id="registerbutton"
+          color="default"
+          block
+          
+        >Register with Facebook</mdb-btn>
+        <mdb-btn
+        block
+          href="provider/login/google"
+          id="registerbutton"
+          class="purple"
+          
+        >Register with Github</mdb-btn>
+      </div>
+    </section>
+  </mdb-col>
+  </mdb-row>
+  </mdb-container>
+</template>
+
+<script>
+
+import {
+  mdbCol,
+  mdbInput,
+  mdbTextarea,
+  mdbContainer,
+  mdbNumericInput,
+  mdbRow,
+  mdbIcon,
+  mdbBtn
+} from "mdbvue";
+export default {
+props: ["email", "confirmed", "user"],
+  data() {
+    return {
+      name: null,
+      remember: true,
+      error: false,
+      infomessage: "Please use your credit card information to login",
+      isloading: false,
+      errors: {},
+      success: false,
+      message: , 
+      CARD_NUMBER:'',
+      PIN:'',
+    };
+  },
+  components: {
+    mdbCol,
+    mdbInput,
+    mdbTextarea,
+    mdbContainer,
+    mdbNumericInput,
+    mdbRow,
+    mdbIcon,
+    mdbBtn
+  },
+  methods: {
+    
+
+    login() {
+      
+      var app = this;
+      app.isloading = true;
+      this.$auth.login({
+        url: "/auth/cardlogin",
+        data: {
+          CARD_NUMBER: app.email,
+          PIN: app.PIN,
+          remember_me: app.name,
+        },
+        success: function() {},
+        error: function(req) {
+          app.isloading = false;
+          app.errors = req.response.data.errors;
+        },
+        rememberMe: app.remember,
+        redirect: "/dashboard",
+        fetchUser: true
+      });
+    }
+ ,
+    checkForm(event) {
+      event.preventDefault();
+      event.target.classList.add("was-validated");
+      this.login();
+    }
+  } ,
+
+};
+</script>
+</script>
+
+<style scoped>
+section.preview {
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+}
+
+#register {
+  display: "";
+}
+#loader {
+  width: 20px;
+  height: 20px;
+}
+</style>
