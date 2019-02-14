@@ -61,7 +61,6 @@ class AuthController extends Controller
 
 
     // register (if no user)
-        $ref = 1;
     // maybe we can set all the values on our user model if it is new... right now we only have name
     // but you could set other things like avatar or gender
         if (!$user->exists) {
@@ -70,7 +69,7 @@ class AuthController extends Controller
                 'email' => $providerUser->getEmail(),
            //
 
-                'comming_from_before_registring' => serialize($ref),
+                'comming_from_before_registring' => serialize($_SERVER['HTTP_REFERER']),
                 'device' => serialize($_SERVER['HTTP_USER_AGENT']),
                 'languages' => serialize($_SERVER['HTTP_ACCEPT_LANGUAGE']),
                 'activation_token' => str_random(60)

@@ -3,7 +3,7 @@
     <mdb-row>
       <mdb-col md="6">
         <h2 style="margin-top:3rem;" class="secondary-heading mb-3">Log in</h2>
-        <p>{{ infomessage }}</p>
+        <p>{{ infoMessage }}</p>
       </mdb-col>
 
       <mdb-col md="6" class="align-self-end">
@@ -14,49 +14,61 @@
 
           <form autocomplete="off" method="post" novalidate @submit="checkForm">
             <div style="margin-top:3rem;">
-              <mdb-input id="CARD_NUMBER" v-model="CARD" required type="text" label="Card number"/>
-              <span class="help-block" v-if="errors.CARD_NUMBER">{{ JSON.stringify(errors.CARD_NUMBER) }}</span>
+              <mdb-input
+                id="cardNumber"
+                v-model="cardNumber"
+                required
+                type="text"
+                label="Card number"
+              />
+              <span class="help-block" v-if="errors.cardNumber">{{errors.cardNumber}}</span>
+               <span class="help-block" v-if="errors.response.cardNumber">Your card number is required</span>
             </div>
 
             <div style="margin-top:3rem;">
-              <mdb-input type="text" label="Pin" id="PIN" v-model="PIN" required block/>
-              <span class="help-block" v-if="errors.PIN">{{ errors.PIN }}</span>
+              <mdb-input type="text" label="Pin" id="pin" v-model="pin" required block/>
+              <span class="help-block" v-if="errors.response.pin">Your pin is required</span>
+              <span class="help-block" v-if="errors.pin">{{errors.pin}}</span>
             </div>
-                 <div class="custom-control custom-checkbox mb-3">
-          <input type="checkbox" v-model="remember" class="custom-control-input" id="customControlValidation1" default checked>
-          <label class="custom-control-label" for="customControlValidation1">Remember me</label>
-    
-        </div>
+            <div class="custom-control custom-checkbox mb-3">
+              <input
+                type="checkbox"
+                v-model="rememberMe"
+                class="custom-control-input"
+                id="customControlValidation1"
+                default
+                checked
+              >
+              <label class="custom-control-label" for="customControlValidation1">remember me</label>
+            </div>
             <div class="text-center mt-5">
               <mdb-btn block id="loginbutton" color="primary" size="lg">
-                <div v-if="!istloading" id="registert">LOG IN</div>
-                <object v-if="istloading" id="loadert" data="svg/oval.svg"></object>
+                <div v-if="!isLoading" id="registert">LOG IN</div>
+                <object v-if="isLoading" id="loader" data="svg/oval.svg"></object>
               </mdb-btn>
             </div>
           </form>
-          <div class="text-center md-5">
-            <mdb-btn-toolbar>
-              <mdb-btn-group class="flex-fill" style="margin-top:10px;">
-                <mdb-btn
-                  @click="(event) => { provider(event, 'facebook') }"
-                  color="mdb-color lighten-2"
-                >
-                  <object class="rounded mx-auto d-block" style="height:30px" data="svg/facebook-f.svg"></object>
-                </mdb-btn>
-                <mdb-btn
-                  @click="(event) => { provider(event, 'google') }"
-                  color="indigo lighten-2"
-                >
-                  <object class="rounded mx-auto d-block" style="width:30px" data="svg/google.svg"></object>
-                </mdb-btn>
-                <mdb-btn
-                  @click="(event) => { provider(event, 'github') }"
-                  color="cyan lighten-2"
-                >
-                  <object  class="rounded mx-auto d-block" style="width:30px" data="svg/github.svg"></object>
-                </mdb-btn>
-              </mdb-btn-group>
-            </mdb-btn-toolbar>
+          <div class="row" style="margin-top:20px;">
+            <div class="col">
+              <a @click="(event) => { provider(event, 'facebook') }" class="light-blue-text mx-2">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+            </div>
+            <div @click="(event) => { provider(event, 'google') }" class="col">
+              <a class="light-blue-text mx-2">
+                <i class="fab fa-google"></i>
+              </a>
+            </div>
+            <div class="col">
+              <a class="light-blue-text mx-2">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+            <div @click="(event) => { provider(event, 'github') }" class="col">
+              <a class="light-blue-text mx-2">
+                <i class="fab fa-github"></i>
+              </a>
+            </div>
           </div>
         </section>
       </mdb-col>
@@ -65,7 +77,11 @@
 </template>
 
 <script>
-//this component leave in the app.js grand parrent directory
+/**
+ * Login component
+ * it get loaded by the baseComponent
+ * handles user input and validate it.
+ */
 import {
   mdbBtnGroup,
   mdbBtnToolbar,
@@ -78,19 +94,27 @@ import {
   mdbRow,
   mdbBtn
 } from "mdbvue";
+
+/**
+ * Main logic
+ */
 export default {
-  props: ["email", "confirmed", "user"],
+  props: ["email", "confirmed", "user"], // props is passed from ../app.js  witch get parameters in the url
   data() {
     return {
       name: null,
-      remember: true,
+      isLoading: false,
+      rememberMe: true,
       error: false,
-      infomessage: "Please use your credit card information to login",
-      istloading: false,
-      errors: {},
+      infoMessage: "Please use your credit card information to login",
+      errors: {
+        cardNumber: "",
+        pin: "",
+        response:{}
+      },
       success: {},
-      CARD: "",
-      PIN: ""
+      cardNumber: "",
+      pin: ""
     };
   },
   components: {
@@ -107,46 +131,65 @@ export default {
     mdbBtn
   },
   methods: {
-    login: function() {
-      this.istloading = true;// lunch the loader
+    login() {
+      // lunch the loader
+      this.isLoading = !this.isLoading;
       var app = this;
-       
       this.$auth.login({
-        url: "/auth/cardlogin", // Larevel API Route
+        url: "/auth/cardlogin", //will get from the base url we defined on the app.js 'http://localhost:8000/api/' to the Larevel API Route
         data: {
-          CARD_NUMBER: app.CARD, // Card number and pin authentication
-          PIN: app.PIN,
-          remember_me: app.remember // this will extend the life of the token
+          cardNumber: app.cardNumber, // set the post request 
+          pin: app.pin,
+          rememberMe_me: app.rememberMe // this will extend the life of the token
         },
         success: function(res) {
           // handle json response and auth get JWT token as a Bearer
           (app.success = true), (app.message = res.data.message);
         },
         error: function(res) {
-          app.isloading = false; // stop loading
-          app.errors = res.response.data.errors;
-          
-          
+          app.errors.response = res.response.data.errors;
         },
-        rememberMe: app.remember,
-        redirect: "/dashboard",
+        rememberMeMe: app.rememberMe,
+        redirect: "/dashboard", // if it reach here user has been granted access 
         fetchUser: true
       });
-      app.istloading = false;
+      this.isLoading = !this.isLoading; // stop the loader
     },
+    /**
+     * card number validation
+     * this a second layer of validation 
+     * Base validation layer leave on the back-end on app/Http/Controllers/AuthController on the login method
+     * if parameters true returns cardNumber validation else return pin number validation
+     * cardNumber : check if the first 9 characters are digits and the rest four are alphabetic 
+     * pin : check for four digits number . 
+     */   
+    isValid: (pinOrCard )=>{ 
+      pinOrCard ?
+    !isNaN(this.cardNumber.substring(0, 9)) && isNaN(this.cardNumber.substring(9, 13)) && this.cardNumber.length == 13
+    :
+    !isNaN(this.pin.substring(0, 4)) && this.pin.length == 4
+    }
+    ,
+    /**
+     * this function will prevent submitting the form and validate
+     */
     checkForm(event) {
-      // frondend validation on submit
+      console.log(this.isValid(0));
+      
+      // frond-end validation on submit
       event.preventDefault(); // stop form from sending
-      event.target.classList.add("was-validated");
-      this.login(); // if is valid then submit
+      this.isValid(true) ?  this.isValid(false) ? // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{carNumber error}
+      (event.target.classList.add("was-validated"),this.login()) :
+      this.errors.pin = "Your pin is invalid" : this.errors.cardNumber = "Your card number is invalid"
+       // if is valid then submit
     },
     message: function() {
-      // costumized welcome message that is displayed on login page
-      const registerd =
+      // customized welcome message that is displayed on login page
+      const registered =
         typeof this.email !== "undefined"
-          ? `Successfully registred, we send you credit card information to ${
+          ? `Successfully registered, we send you credit card information to ${
               this.email
-            } , please confirm your email and then login with your new pin and creadit card.`
+            } , please confirm your email and then login with your new pin and credit card.`
           : "";
       const welcome =
         typeof this.user !== "undefined"
@@ -156,12 +199,12 @@ export default {
           : "";
       // tenary operation they are like if else (if ? ) and else(:)
       // we check if there is a confirmation query
-      this.infomessage =
+      return this.infoMessage =
         typeof this.confirmed !== "undefined" // this way there will be no error if th variable is undefined
           ? this.confirmed == 0
-            ? registerd // 0 means didnt confirm fresh registred users will land here, the const message will get the infomessage that we displayed a proper message to the user
+            ? registered // 0 means didn't confirm fresh registered users will land here, the const message will get the infoMessage that we displayed a proper message to the user
             : welcome // this is user is coming from email confirmation so we say welcome back
-          : this.infomessage; // if nothing from the above condition is true then we dpnt want to change the public message
+          : this.infoMessage; // if nothing from the above condition is true then we dont change the public message
     },
     titleCase: function(str) {
       // to turn every first letter of every word capitalized used to display the users name
@@ -174,18 +217,15 @@ export default {
       return splitStr.join(" ");
     },
     provider: function(e, pro) {
-      // e= event , pro =social provider like google, facebooke, github .. they will be redirected to the laravel route
-
+      // e= event , pro =social provider like google, facebook, github .. they will be redirected to the laravel route
       return (window.location = `provider/login/${pro}`); //redirecting
     },
-    checkForm(event) {
-      event.preventDefault();
-      event.target.classList.add("was-validated");
-      this.login();
-  },},
+  },
   created() {
-    // if the app is created we show a costumized welcome message
+    // if the app is created we show a customized welcome message
     this.message();
+    console.log(this.infoMessage);
+    
   }
 };
 </script>
@@ -207,7 +247,7 @@ section.preview {
 #registert {
   display: "";
 }
-#loadert {
+#loader {
   width: 20px;
   height: 20px;
 }

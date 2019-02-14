@@ -3615,7 +3615,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mdbvue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mdbvue */ "./node_modules/mdbvue/src/index.js");
-var _components;
+var _components,
+    _this = undefined;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -3685,21 +3686,47 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//this component leave in the app.js grand parrent directory
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/**
+ * Login component
+ * it get loaded by the baseComponent
+ * handles user input and validate it.
+ */
+
+/**
+ * Main logic
+ */
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["email", "confirmed", "user"],
+  // props is passed from ../app.js  witch get parameters in the url
   data: function data() {
     return {
       name: null,
-      remember: true,
+      isLoading: false,
+      rememberMe: true,
       error: false,
-      infomessage: "Please use your credit card information to login",
-      istloading: false,
-      errors: {},
+      infoMessage: "Please use your credit card information to login",
+      errors: {
+        cardNumber: "",
+        pin: "",
+        response: {}
+      },
       success: {},
-      CARD: "",
-      PIN: ""
+      cardNumber: "",
+      pin: ""
     };
   },
   components: (_components = {
@@ -3713,19 +3740,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     mdbNumericInput: mdbvue__WEBPACK_IMPORTED_MODULE_0__["mdbNumericInput"],
     mdbRow: mdbvue__WEBPACK_IMPORTED_MODULE_0__["mdbRow"]
   }, _defineProperty(_components, "mdbIcon", mdbvue__WEBPACK_IMPORTED_MODULE_0__["mdbIcon"]), _defineProperty(_components, "mdbBtn", mdbvue__WEBPACK_IMPORTED_MODULE_0__["mdbBtn"]), _components),
-  methods: _defineProperty({
+  methods: {
     login: function login() {
-      this.istloading = true; // lunch the loader
-
+      // lunch the loader
+      this.isLoading = !this.isLoading;
       var app = this;
       this.$auth.login({
         url: "/auth/cardlogin",
-        // Larevel API Route
+        //will get from the base url we defined on the app.js 'http://localhost:8000/api/' to the Larevel API Route
         data: {
-          CARD_NUMBER: app.CARD,
-          // Card number and pin authentication
-          PIN: app.PIN,
-          remember_me: app.remember // this will extend the life of the token
+          cardNumber: app.cardNumber,
+          // set the post request 
+          pin: app.pin,
+          rememberMe_me: app.rememberMe // this will extend the life of the token
 
         },
         success: function success(res) {
@@ -3733,33 +3760,49 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           app.success = true, app.message = res.data.message;
         },
         error: function error(res) {
-          app.isloading = false; // stop loading
-
-          app.errors = res.response.data.errors;
+          app.errors.response = res.response.data.errors;
         },
-        rememberMe: app.remember,
+        rememberMeMe: app.rememberMe,
         redirect: "/dashboard",
+        // if it reach here user has been granted access 
         fetchUser: true
       });
-      app.istloading = false;
+      this.isLoading = !this.isLoading; // stop the loader
     },
+
+    /**
+     * card number validation
+     * this a second layer of validation 
+     * Base validation layer leave on the back-end on app/Http/Controllers/AuthController on the login method
+     * if parameters true returns cardNumber validation else return pin number validation
+     * cardNumber : check if the first 9 characters are digits and the rest four are alphabetic 
+     * pin : check for four digits number . 
+     */
+    isValid: function isValid(pinOrCard) {
+      pinOrCard ? !isNaN(_this.cardNumber.substring(0, 9)) && isNaN(_this.cardNumber.substring(9, 13)) && _this.cardNumber.length == 13 : !isNaN(_this.pin.substring(0, 4)) && _this.pin.length == 4;
+    },
+
+    /**
+     * this function will prevent submitting the form and validate
+     */
     checkForm: function checkForm(event) {
-      // frondend validation on submit
+      console.log(this.isValid(0)); // frond-end validation on submit
+
       event.preventDefault(); // stop form from sending
 
-      event.target.classList.add("was-validated");
-      this.login(); // if is valid then submit
+      this.isValid(true) ? this.isValid(false) ? ( // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{carNumber error}
+      event.target.classList.add("was-validated"), this.login()) : this.errors.pin = "Your pin is invalid" : this.errors.cardNumber = "Your card number is invalid"; // if is valid then submit
     },
     message: function message() {
-      // costumized welcome message that is displayed on login page
-      var registerd = typeof this.email !== "undefined" ? "Successfully registred, we send you credit card information to ".concat(this.email, " , please confirm your email and then login with your new pin and creadit card.") : "";
+      // customized welcome message that is displayed on login page
+      var registered = typeof this.email !== "undefined" ? "Successfully registered, we send you credit card information to ".concat(this.email, " , please confirm your email and then login with your new pin and credit card.") : "";
       var welcome = typeof this.user !== "undefined" ? "Welcome back ".concat(this.titleCase(this.user), " Please use your credit card information to login.") : ""; // tenary operation they are like if else (if ? ) and else(:)
       // we check if there is a confirmation query
 
-      this.infomessage = typeof this.confirmed !== "undefined" // this way there will be no error if th variable is undefined
-      ? this.confirmed == 0 ? registerd // 0 means didnt confirm fresh registred users will land here, the const message will get the infomessage that we displayed a proper message to the user
+      return this.infoMessage = typeof this.confirmed !== "undefined" // this way there will be no error if th variable is undefined
+      ? this.confirmed == 0 ? registered // 0 means didn't confirm fresh registered users will land here, the const message will get the infoMessage that we displayed a proper message to the user
       : welcome // this is user is coming from email confirmation so we say welcome back
-      : this.infomessage; // if nothing from the above condition is true then we dpnt want to change the public message
+      : this.infoMessage; // if nothing from the above condition is true then we dont change the public message
     },
     titleCase: function titleCase(str) {
       // to turn every first letter of every word capitalized used to display the users name
@@ -3773,17 +3816,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return splitStr.join(" ");
     },
     provider: function provider(e, pro) {
-      // e= event , pro =social provider like google, facebooke, github .. they will be redirected to the laravel route
+      // e= event , pro =social provider like google, facebook, github .. they will be redirected to the laravel route
       return window.location = "provider/login/".concat(pro); //redirecting
     }
-  }, "checkForm", function checkForm(event) {
-    event.preventDefault();
-    event.target.classList.add("was-validated");
-    this.login();
-  }),
+  },
   created: function created() {
-    // if the app is created we show a costumized welcome message
+    // if the app is created we show a customized welcome message
     this.message();
+    console.log(this.infoMessage);
   }
 });
 
@@ -3867,13 +3907,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
+
+/**
+ * Register component 
+ * validate user input and send it as a post request
+ */
+
+/**
+ * Main logic
+ */
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -3882,8 +3924,11 @@ __webpack_require__.r(__webpack_exports__);
       email: "",
       error: false,
       message: {},
-      isloading: false,
-      errors: {},
+      isLoading: false,
+      errors: {
+        email: '',
+        response: {}
+      },
       success: false
     };
   },
@@ -3901,7 +3946,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     register: function register() {
-      this.isloading = true;
+      this.isLoading = true; // show the loader svg
+
       var app = this;
       this.$auth.register({
         url: "/auth/signup",
@@ -3915,18 +3961,22 @@ __webpack_require__.r(__webpack_exports__);
         error: function error(res) {
           app.error = true;
           app.errors = res.response.data.errors;
-          app.isloading = false;
+          app.isLoading = false;
         },
         redirect: null
       });
     },
+    validateEmail: function validateEmail(email) {
+      // validating email with RegExp it returns the email i lower case if it passes the test else returns false
+      return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(String(email).toLowerCase());
+    },
     provider: function provider(e, pro) {
-      return window.location = "provider/login/".concat(pro);
+      // e= event , pro =social provider like google, facebook, github .. they will be redirected to the laravel route
+      return window.location = "provider/login/".concat(pro); // we send to Laravel root depending on the social provider
     },
     checkForm: function checkForm(event) {
       event.preventDefault();
-      event.target.classList.add("was-validated");
-      this.register();
+      this.validateEmail(this.email) ? (event.target.classList.add("was-validated"), this.register()) : this.errors.email = 'please enter a valid email';
     }
   }
 });
@@ -3966,6 +4016,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
+/**
+ * baseComponent is the route in action
+ * checks authentication before redirect
+ * it redirects to the name of the router that are defined on app.js
+ * the only method we need here is log out defined on loggingout method
+ *
+ */
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -19769,7 +19827,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "\nsection.preview[data-v-4221c3ad] {\n  border: 1px solid #e0e0e0;\n  padding: 15px;\n}\n.social[data-v-4221c3ad] {\n  display: block;\n  width: 25px;\n  height: 25px;\n  bottom: 5px;\n  opacity: 1;\n}\n#registert[data-v-4221c3ad] {\n  display: \"\";\n}\n#loadert[data-v-4221c3ad] {\n  width: 20px;\n  height: 20px;\n}\n", ""]);
+exports.push([module.i, "\nsection.preview[data-v-4221c3ad] {\n  border: 1px solid #e0e0e0;\n  padding: 15px;\n}\n.social[data-v-4221c3ad] {\n  display: block;\n  width: 25px;\n  height: 25px;\n  bottom: 5px;\n  opacity: 1;\n}\n#registert[data-v-4221c3ad] {\n  display: \"\";\n}\n#loader[data-v-4221c3ad] {\n  width: 20px;\n  height: 20px;\n}\n", ""]);
 
 // exports
 
@@ -19788,7 +19846,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "\nsection.preview[data-v-d4f9cbe2] {\n  border: 1px solid #e0e0e0;\n  padding: 15px;\n}\n.social[data-v-d4f9cbe2] {\n  display: block;\n  margin-left: auto;\n  margin-right: auto;\n  width: 25px;\n  height: 25px;\n  bottom: 5px;\n  opacity: 1;\n}\n#register[data-v-d4f9cbe2] {\n  display: \"\";\n}\n#loader[data-v-d4f9cbe2] {\n  width: 20px;\n  height: 20px;\n}\n", ""]);
+exports.push([module.i, "\nsection.preview[data-v-d4f9cbe2] {\n  border: 1px solid #e0e0e0;\n  padding: 15px;\n}\n#register[data-v-d4f9cbe2] {\n  display: \"\";\n}\n#loader[data-v-d4f9cbe2] {\n  width: 20px;\n  height: 20px;\n}\n", ""]);
 
 // exports
 
@@ -60975,7 +61033,7 @@ var render = function() {
               [_vm._v("Log in")]
             ),
             _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.infomessage))])
+            _c("p", [_vm._v(_vm._s(_vm.infoMessage))])
           ]),
           _vm._v(" "),
           _c("mdb-col", { staticClass: "align-self-end", attrs: { md: "6" } }, [
@@ -61010,25 +61068,29 @@ var render = function() {
                       [
                         _c("mdb-input", {
                           attrs: {
-                            id: "CARD_NUMBER",
+                            id: "cardNumber",
                             required: "",
                             type: "text",
                             label: "Card number"
                           },
                           model: {
-                            value: _vm.CARD,
+                            value: _vm.cardNumber,
                             callback: function($$v) {
-                              _vm.CARD = $$v
+                              _vm.cardNumber = $$v
                             },
-                            expression: "CARD"
+                            expression: "cardNumber"
                           }
                         }),
                         _vm._v(" "),
-                        _vm.errors.CARD_NUMBER
+                        _vm.errors.cardNumber
                           ? _c("span", { staticClass: "help-block" }, [
-                              _vm._v(
-                                _vm._s(JSON.stringify(_vm.errors.CARD_NUMBER))
-                              )
+                              _vm._v(_vm._s(_vm.errors.cardNumber))
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.errors.response.cardNumber
+                          ? _c("span", { staticClass: "help-block" }, [
+                              _vm._v("Your card number is required")
                             ])
                           : _vm._e()
                       ],
@@ -61043,22 +61105,28 @@ var render = function() {
                           attrs: {
                             type: "text",
                             label: "Pin",
-                            id: "PIN",
+                            id: "pin",
                             required: "",
                             block: ""
                           },
                           model: {
-                            value: _vm.PIN,
+                            value: _vm.pin,
                             callback: function($$v) {
-                              _vm.PIN = $$v
+                              _vm.pin = $$v
                             },
-                            expression: "PIN"
+                            expression: "pin"
                           }
                         }),
                         _vm._v(" "),
-                        _vm.errors.PIN
+                        _vm.errors.response.pin
                           ? _c("span", { staticClass: "help-block" }, [
-                              _vm._v(_vm._s(_vm.errors.PIN))
+                              _vm._v("Your pin is required")
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.errors.pin
+                          ? _c("span", { staticClass: "help-block" }, [
+                              _vm._v(_vm._s(_vm.errors.pin))
                             ])
                           : _vm._e()
                       ],
@@ -61074,8 +61142,8 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.remember,
-                              expression: "remember"
+                              value: _vm.rememberMe,
+                              expression: "rememberMe"
                             }
                           ],
                           staticClass: "custom-control-input",
@@ -61086,28 +61154,29 @@ var render = function() {
                             checked: ""
                           },
                           domProps: {
-                            checked: Array.isArray(_vm.remember)
-                              ? _vm._i(_vm.remember, null) > -1
-                              : _vm.remember
+                            checked: Array.isArray(_vm.rememberMe)
+                              ? _vm._i(_vm.rememberMe, null) > -1
+                              : _vm.rememberMe
                           },
                           on: {
                             change: function($event) {
-                              var $$a = _vm.remember,
+                              var $$a = _vm.rememberMe,
                                 $$el = $event.target,
                                 $$c = $$el.checked ? true : false
                               if (Array.isArray($$a)) {
                                 var $$v = null,
                                   $$i = _vm._i($$a, $$v)
                                 if ($$el.checked) {
-                                  $$i < 0 && (_vm.remember = $$a.concat([$$v]))
+                                  $$i < 0 &&
+                                    (_vm.rememberMe = $$a.concat([$$v]))
                                 } else {
                                   $$i > -1 &&
-                                    (_vm.remember = $$a
+                                    (_vm.rememberMe = $$a
                                       .slice(0, $$i)
                                       .concat($$a.slice($$i + 1)))
                                 }
                               } else {
-                                _vm.remember = $$c
+                                _vm.rememberMe = $$c
                               }
                             }
                           }
@@ -61119,7 +61188,7 @@ var render = function() {
                             staticClass: "custom-control-label",
                             attrs: { for: "customControlValidation1" }
                           },
-                          [_vm._v("Remember me")]
+                          [_vm._v("remember me")]
                         )
                       ]
                     ),
@@ -61139,15 +61208,15 @@ var render = function() {
                             }
                           },
                           [
-                            !_vm.istloading
+                            !_vm.isLoading
                               ? _c("div", { attrs: { id: "registert" } }, [
                                   _vm._v("LOG IN")
                                 ])
                               : _vm._e(),
                             _vm._v(" "),
-                            _vm.istloading
+                            _vm.isLoading
                               ? _c("object", {
-                                  attrs: { id: "loadert", data: "svg/oval.svg" }
+                                  attrs: { id: "loader", data: "svg/oval.svg" }
                                 })
                               : _vm._e()
                           ]
@@ -61160,82 +61229,63 @@ var render = function() {
                 _vm._v(" "),
                 _c(
                   "div",
-                  { staticClass: "text-center md-5" },
+                  { staticClass: "row", staticStyle: { "margin-top": "20px" } },
                   [
+                    _c("div", { staticClass: "col" }, [
+                      _c(
+                        "a",
+                        {
+                          staticClass: "light-blue-text mx-2",
+                          on: {
+                            click: function(event) {
+                              _vm.provider(event, "facebook")
+                            }
+                          }
+                        },
+                        [_c("i", { staticClass: "fab fa-facebook-f" })]
+                      )
+                    ]),
+                    _vm._v(" "),
                     _c(
-                      "mdb-btn-toolbar",
+                      "div",
+                      {
+                        staticClass: "col",
+                        on: {
+                          click: function(event) {
+                            _vm.provider(event, "google")
+                          }
+                        }
+                      },
                       [
-                        _c(
-                          "mdb-btn-group",
-                          {
-                            staticClass: "flex-fill",
-                            staticStyle: { "margin-top": "10px" }
-                          },
-                          [
-                            _c(
-                              "mdb-btn",
-                              {
-                                attrs: { color: "mdb-color lighten-2" },
-                                on: {
-                                  click: function(event) {
-                                    _vm.provider(event, "facebook")
-                                  }
-                                }
-                              },
-                              [
-                                _c("object", {
-                                  staticClass: "rounded mx-auto d-block",
-                                  staticStyle: { height: "30px" },
-                                  attrs: { data: "svg/facebook-f.svg" }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "mdb-btn",
-                              {
-                                attrs: { color: "indigo lighten-2" },
-                                on: {
-                                  click: function(event) {
-                                    _vm.provider(event, "google")
-                                  }
-                                }
-                              },
-                              [
-                                _c("object", {
-                                  staticClass: "rounded mx-auto d-block",
-                                  staticStyle: { width: "30px" },
-                                  attrs: { data: "svg/google.svg" }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "mdb-btn",
-                              {
-                                attrs: { color: "cyan lighten-2" },
-                                on: {
-                                  click: function(event) {
-                                    _vm.provider(event, "github")
-                                  }
-                                }
-                              },
-                              [
-                                _c("object", {
-                                  staticClass: "rounded mx-auto d-block",
-                                  staticStyle: { width: "30px" },
-                                  attrs: { data: "svg/github.svg" }
-                                })
-                              ]
-                            )
-                          ],
-                          1
-                        )
-                      ],
-                      1
+                        _c("a", { staticClass: "light-blue-text mx-2" }, [
+                          _c("i", { staticClass: "fab fa-google" })
+                        ])
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col" }, [
+                      _c("a", { staticClass: "light-blue-text mx-2" }, [
+                        _c("i", { staticClass: "fab fa-linkedin-in" })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        staticClass: "col",
+                        on: {
+                          click: function(event) {
+                            _vm.provider(event, "github")
+                          }
+                        }
+                      },
+                      [
+                        _c("a", { staticClass: "light-blue-text mx-2" }, [
+                          _c("i", { staticClass: "fab fa-github" })
+                        ])
+                      ]
                     )
-                  ],
-                  1
+                  ]
                 )
               ]
             )
@@ -61399,13 +61449,13 @@ var render = function() {
                                 }
                               },
                               [
-                                !_vm.isloading
+                                !_vm.isLoading
                                   ? _c("div", { attrs: { id: "register" } }, [
                                       _vm._v("REGISTER")
                                     ])
                                   : _vm._e(),
                                 _vm._v(" "),
-                                _vm.isloading
+                                _vm.isLoading
                                   ? _c("object", {
                                       attrs: {
                                         id: "loader",
@@ -61422,83 +61472,71 @@ var render = function() {
                     )
                   : _vm._e(),
                 _vm._v(" "),
-                _c(
-                  "div",
-                  { staticClass: "text-center mt-5" },
-                  [
-                    _c(
-                      "mdb-btn-toolbar",
-                      [
+                _c("div", { staticClass: "text-center mt-5" }, [
+                  _c(
+                    "div",
+                    {
+                      staticClass: "row",
+                      staticStyle: { "margin-top": "20px" }
+                    },
+                    [
+                      _c("div", { staticClass: "col" }, [
                         _c(
-                          "mdb-btn-group",
+                          "a",
                           {
-                            staticClass: "flex-fill",
-                            staticStyle: { "margin-top": "10px" }
+                            staticClass: "light-blue-text mx-2",
+                            on: {
+                              click: function(event) {
+                                _vm.provider(event, "facebook")
+                              }
+                            }
                           },
-                          [
-                            _c(
-                              "mdb-btn",
-                              {
-                                attrs: { color: "mdb-color lighten-2" },
-                                on: {
-                                  click: function(event) {
-                                    _vm.provider(event, "facebook")
-                                  }
-                                }
-                              },
-                              [
-                                _c("object", {
-                                  staticClass: "social",
-                                  attrs: { data: "svg/facebook-f.svg" }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "mdb-btn",
-                              {
-                                attrs: { color: "indigo lighten-2" },
-                                on: {
-                                  click: function(event) {
-                                    _vm.provider(event, "google")
-                                  }
-                                }
-                              },
-                              [
-                                _c("object", {
-                                  staticClass: "social",
-                                  attrs: { data: "svg/google.svg" }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "mdb-btn",
-                              {
-                                attrs: { color: "cyan lighten-2" },
-                                on: {
-                                  click: function(event) {
-                                    _vm.provider(event, "github")
-                                  }
-                                }
-                              },
-                              [
-                                _c("object", {
-                                  staticClass: "social",
-                                  staticStyle: { width: "30px" },
-                                  attrs: { data: "svg/github.svg" }
-                                })
-                              ]
-                            )
-                          ],
-                          1
+                          [_c("i", { staticClass: "fab fa-facebook-f" })]
                         )
-                      ],
-                      1
-                    )
-                  ],
-                  1
-                )
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col",
+                          on: {
+                            click: function(event) {
+                              _vm.provider(event, "google")
+                            }
+                          }
+                        },
+                        [
+                          _c("a", { staticClass: "light-blue-text mx-2" }, [
+                            _c("i", { staticClass: "fab fa-google" })
+                          ])
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col" }, [
+                        _c("a", { staticClass: "light-blue-text mx-2" }, [
+                          _c("i", { staticClass: "fab fa-linkedin-in" })
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col",
+                          on: {
+                            click: function(event) {
+                              _vm.provider(event, "github")
+                            }
+                          }
+                        },
+                        [
+                          _c("a", { staticClass: "light-blue-text mx-2" }, [
+                            _c("i", { staticClass: "fab fa-github" })
+                          ])
+                        ]
+                      )
+                    ]
+                  )
+                ])
               ]
             )
           ])
@@ -76307,24 +76345,41 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_auth_Register_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/auth/Register.vue */ "./resources/js/components/auth/Register.vue");
 /* harmony import */ var _components_auth_Login_vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/auth/Login.vue */ "./resources/js/components/auth/Login.vue");
 /* harmony import */ var _components_Dashboard_vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/Dashboard.vue */ "./resources/js/components/Dashboard.vue");
+/**
+ * Centralized file
+ * loads main libraries
+ * load frond-end framework
+ * load all component
+ * initialize vue router
+ * mounts all data in the welcome.blade.php
+ * load all required libraries and components
+ */
+// main libraries 
 
 
 
+ // front-end libraries
 
  // only bootstrap css , no jquery
 
- // the best for frondend
+ // the best for frond-end
+// components
 
 
 
 
 
- // only authenticated user get acceces to this 
+ // only authenticated user get access to this 
+
+/**
+ * initializing the router 
+ * every router get:
+ * path : the url on the address bar 
+ * name : name of the router that we later direct to the corresponding router (see auth/baseComponent.vue)
+ * component : the component that is associated with the route
+ */
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]);
-vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_axios__WEBPACK_IMPORTED_MODULE_3___default.a, axios__WEBPACK_IMPORTED_MODULE_2___default.a);
-axios__WEBPACK_IMPORTED_MODULE_2___default.a.defaults.baseURL = 'http://localhost:8000/api/'; // all http methods will get out of this url 
-
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   routes: [{
     path: '/',
@@ -76338,6 +76393,7 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
       auth: false
     }
   }, {
+    // we get the query from the url and then we pass props to the login component. 
     path: '/login',
     name: 'login',
     component: _components_auth_Login_vue__WEBPACK_IMPORTED_MODULE_9__["default"],
@@ -76364,12 +76420,28 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
 
 });
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.router = router;
+/**
+ * setting all http methods to get out to the api url 
+ */
+
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_axios__WEBPACK_IMPORTED_MODULE_3___default.a, axios__WEBPACK_IMPORTED_MODULE_2___default.a);
+axios__WEBPACK_IMPORTED_MODULE_2___default.a.defaults.baseURL = 'http://localhost:8000/api/';
+/**
+ * setting up the security
+ * authentication methods 
+ * Bearer JSON web token
+ */
+
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(__webpack_require__(/*! @websanova/vue-auth */ "./node_modules/@websanova/vue-auth/src/index.js"), {
   auth: __webpack_require__(/*! @websanova/vue-auth/drivers/auth/bearer.js */ "./node_modules/@websanova/vue-auth/drivers/auth/bearer.js"),
   http: __webpack_require__(/*! @websanova/vue-auth/drivers/http/axios.1.x.js */ "./node_modules/@websanova/vue-auth/drivers/http/axios.1.x.js"),
   router: __webpack_require__(/*! @websanova/vue-auth/drivers/router/vue-router.2.x.js */ "./node_modules/@websanova/vue-auth/drivers/router/vue-router.2.x.js")
 });
 _components_auth_baseComponent_vue__WEBPACK_IMPORTED_MODULE_6__["default"].router = vue__WEBPACK_IMPORTED_MODULE_0___default.a.router;
+/**
+ * get the div with id #app and mouting all the app
+ */
+
 new vue__WEBPACK_IMPORTED_MODULE_0___default.a(_components_auth_baseComponent_vue__WEBPACK_IMPORTED_MODULE_6__["default"]).$mount('#app'); // here where all start
 
 /***/ }),

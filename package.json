@@ -35,6 +35,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.5",
     "bootstrap-css-only": "^4.2.1",
     "dotenv": "^6.2.0",
+    "gsap": "^2.0.2",
     "mdbvue": "^5.1.0"
   }
 }

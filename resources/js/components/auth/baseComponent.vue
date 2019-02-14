@@ -21,6 +21,14 @@
 </template>
 
 <script>
+/**
+ * baseComponent is the route in action
+ * checks authentication before redirect
+ * it redirects to the name of the router that are defined on app.js
+ * the only method we need here is log out defined on loggingout method
+ *
+ */
+
 import {
   mdbNavbar,
   mdbNavItem,

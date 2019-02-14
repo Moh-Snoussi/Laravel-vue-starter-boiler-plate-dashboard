@@ -1,23 +1,37 @@
+/**
+ * Centralized file
+ * loads main libraries
+ * load frond-end framework
+ * load all component
+ * initialize vue router
+ * mounts all data in the welcome.blade.php
+ * load all required libraries and components
+ */
 
+// main libraries 
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
-
+// front-end libraries
 import 'bootstrap-css-only/css/bootstrap.min.css'; // only bootstrap css , no jquery
-import 'mdbvue/build/css/mdb.css'; // the best for frondend
-
+import 'mdbvue/build/css/mdb.css'; // the best for frond-end
+// components
 import App from './components/auth/baseComponent.vue';
 import Home from './components/auth/Home.vue';
 import Register from './components/auth/Register.vue';
 import Login from './components/auth/Login.vue';
+import Dashboard from './components/Dashboard.vue'; // only authenticated user get access to this 
 
-import Dashboard from './components/Dashboard.vue'; // only authenticated user get acceces to this 
-
-
+/**
+ * initializing the router 
+ * every router get:
+ * path : the url on the address bar 
+ * name : name of the router that we later direct to the corresponding router (see auth/baseComponent.vue)
+ * component : the component that is associated with the route
+ */
 Vue.use(VueRouter);
-Vue.use(VueAxios, axios);
-axios.defaults.baseURL = 'http://localhost:8000/api/'; // all http methods will get out of this url 
+
 const router = new VueRouter({
     routes: [{
         path: '/',
@@ -30,7 +44,7 @@ const router = new VueRouter({
         meta: {
             auth: false
         }
-    }, {
+    }, { // we get the query from the url and then we pass props to the login component. 
         path: '/login',
         name: 'login',
         component: Login,
@@ -49,12 +63,29 @@ const router = new VueRouter({
     mode: 'history' // to have lean url without '#'
 });
 Vue.router = router
+
+/**
+ * setting all http methods to get out to the api url 
+ */
+Vue.use(VueAxios, axios);
+axios.defaults.baseURL = 'http://localhost:8000/api/';
+
+
+/**
+ * setting up the security
+ * authentication methods 
+ * Bearer JSON web token
+ */
 Vue.use(require('@websanova/vue-auth'), {
     auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
     http: require('@websanova/vue-auth/drivers/http/axios.1.x.js'),
     router: require('@websanova/vue-auth/drivers/router/vue-router.2.x.js'),
 });
 App.router = Vue.router
+
+/**
+ * get the div with id #app and mouting all the app
+ */
 new Vue(App).$mount('#app');
 
 // here where all start

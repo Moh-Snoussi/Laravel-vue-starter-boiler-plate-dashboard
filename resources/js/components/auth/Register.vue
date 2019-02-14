@@ -32,48 +32,46 @@
             </div>
             <div class="text-center mt-5">
               <mdb-btn id="registerbutton" color="primary" block>
-                <div v-if="!isloading" id="register">REGISTER</div>
-                <object v-if="isloading" id="loader" data="svg/tail-spin.svg"></object>
+                <div v-if="!isLoading" id="register">REGISTER</div>
+                <object v-if="isLoading" id="loader" data="svg/tail-spin.svg"></object>
               </mdb-btn>
             </div>
           </form>
           <div v-cloak class="text-center mt-5">
-            <mdb-btn-toolbar>
-              <mdb-btn-group class="flex-fill" style="margin-top:10px;">
-                <mdb-btn
-            
-                  @click="(event) => { provider(event, 'facebook') }"
-                  color="mdb-color lighten-2"
-                >
-                  <object class="social" data="svg/facebook-f.svg"></object>
-                </mdb-btn>
-
-                <mdb-btn 
-                
-                  
-                  @click="(event) => { provider(event, 'google') }"
-                  color="indigo lighten-2"
-                >
-                  <object  class="social" data="svg/google.svg"></object>
-                </mdb-btn>
-                <mdb-btn
-               
-                
-                  @click="(event) => { provider(event, 'github') }"
-                  color="cyan lighten-2"
-                >
-                  <object class="social" style="width:30px;" data="svg/github.svg"></object>
-                </mdb-btn>
-              </mdb-btn-group>
-            </mdb-btn-toolbar>
+            <div class="row" style="margin-top:20px;">
+              <div class="col">
+                <a @click="(event) => { provider(event, 'facebook') }" class="light-blue-text mx-2">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+              </div>
+              <div @click="(event) => { provider(event, 'google') }" class="col">
+                <a class="light-blue-text mx-2">
+                  <i class="fab fa-google"></i>
+                </a>
+              </div>
+              <div class="col">
+                <a class="light-blue-text mx-2">
+                  <i class="fab fa-linkedin-in"></i>
+                </a>
+              </div>
+              <div @click="(event) => { provider(event, 'github') }" class="col">
+                <a class="light-blue-text mx-2">
+                  <i class="fab fa-github"></i>
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </mdb-col>
     </mdb-row>
   </mdb-container>
 </template>
-
 <script>
+
+/**
+ * Register component 
+ * validate user input and send it as a post request
+ */
 import {
   mdbCol,
   mdbInput,
@@ -87,6 +85,10 @@ import {
   mdbBtnGroup,
   mdbBtnToolbar
 } from "mdbvue";
+
+/**
+ * Main logic
+ */
 export default {
   data() {
     return {
@@ -94,12 +96,15 @@ export default {
       email: "",
       error: false,
       message: {},
-      isloading: false,
-      errors: {},
+      isLoading: false,
+      errors: {
+        email:'',
+        response:{}
+      },
       success: false
     };
   },
-  components: {
+  components: { 
     mdbCol,
     mdbInput,
     mdbTextarea,
@@ -113,7 +118,7 @@ export default {
   },
   methods: {
     register() {
-      this.isloading = true;
+      this.isLoading = true;// show the loader svg
       var app = this;
       this.$auth.register({
         url: "/auth/signup",
@@ -127,39 +132,36 @@ export default {
         error: function(res) {
           app.error = true;
           app.errors = res.response.data.errors;
-          app.isloading = false;
+          app.isLoading = false;
         },
         redirect: null
       });
     },
+validateEmail(email) { // validating email with RegExp it returns the email i lower case if it passes the test else returns false
+    return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(String(email).toLowerCase());
+}
+  ,
     provider: (e, pro) => {
-      return (window.location = `provider/login/${pro}`);
+      // e= event , pro =social provider like google, facebook, github .. they will be redirected to the laravel route
+      return (window.location = `provider/login/${pro}`); // we send to Laravel root depending on the social provider
     },
     checkForm(event) {
       event.preventDefault();
-      event.target.classList.add("was-validated");
-      this.register();
+      this.validateEmail(this.email) ?  
+      (event.target.classList.add("was-validated"),this.register()) :
+      this.errors.email = 'please enter a valid email';
     }
   }
 };
 </script>
 
-[v-cloak] > * { display:none }
+[v-cloak] > * { display:none } // v-cloak is only available on page load, it  is useful as sometime at page load we see the {{}} 
 [v-cloak]::before { content: "loading…" }
-
+// scoped style will be not used by other component
 <style scoped>
 section.preview {
   border: 1px solid #e0e0e0;
   padding: 15px;
-}
-.social {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 25px;
-  height: 25px;
-  bottom: 5px;
-  opacity: 1;
 }
 
 #register {
