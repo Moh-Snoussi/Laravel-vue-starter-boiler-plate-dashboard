@@ -1,8 +1,4 @@
-This is a project in progress we want to build the a strong and beautiful application.
-
-A basic SPA with stateless authentication uses JWT. user can also login with google, facebook or github,
-
-Users can register with name and email , then they get an email with card code, PIN and a confirmation button, as soon as they confirm we direct them to login site where they can login with the card number and the pin. if authenticated they land on a dashboard.
+This is a project in progress we are building a basic SPA with stateless authentication uses JWT. user can login with google, facebook or github, they register with name and email , then they get an email with card code, PIN and a confirmation button, as soon as they confirm we direct them to login site where they can login with the card number and the pin. if authenticated they land on a dashboard.
 
 the class associated with this work is on app/Notification/SignupActivate.php that get called by app/http/controllers/AuthController.php
 
