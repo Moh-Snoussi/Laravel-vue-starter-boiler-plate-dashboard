@@ -14,16 +14,17 @@ class Accounts extends Migration
     public function up()
     {
         //
-        Schema::create('accounts', function (Blueprint $table){
-        $table->increments('account_id');
+        Schema::create('accounts', function (Blueprint $table) {
+            $table->increments('account_id');
             $table->string('user_id');
-            $table->string('CARD_NUMBER')->unique();
-            $table->string('PIN');
+            $table->string('cardNumber')->unique();
+            $table->string('pin');
             $table->integer('amount');
             $table->boolean('Active')->default(false);
             $table->timestamps();
-        }
-    );
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+        });
     }
 
     /**

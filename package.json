@@ -1,6 +1,6 @@
 {
   "name": "phpwithvuejs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A sample php app with vuejs",
   "private": true,
   "scripts": {
@@ -36,6 +36,8 @@
     "bootstrap-css-only": "^4.2.1",
     "dotenv": "^6.2.0",
     "gsap": "^2.0.2",
-    "mdbvue": "^5.1.0"
+    "mdbvue": "^5.1.0",
+    "vue-cookie": "^1.1.4",
+    "vue-tree-nav": "0.0.11"
   }
 }

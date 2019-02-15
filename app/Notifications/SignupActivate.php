@@ -8,12 +8,28 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use App\Account;
 
+/**
+ * A class responsible for sending verification email 
+ * email preferences need to be setup on .env file on the root folder
+ * creates card numbers and hashed pin associate them with the user 
+ * saves in accounts table on database the information
+ * this class is called by 
+ * file: app/Http/Controller/AuthController.php 
+ * class: AuthController
+ * method: public function signup(Request $request) 
+ * usage: $user->notify(new SignupActivate($user));
+ * @param json // accepts a json as parameters
+ *
+ * @author Mohamed Snoussi
+ *
+ */
+
 class SignupActivate extends Notification
 {
     use Queueable;
 
-    private $CARD;
-    private $PIN;
+    private $cardNumber;
+    private $pin;
 
     /**
      * Create a new notification instance.
@@ -36,13 +52,15 @@ class SignupActivate extends Notification
         return ['mail'];
     }
 
-
     /**
-     * creating rondom string .
+     * private function for returning the return random string
+     * used for the card number
+     * if parameters are not available in function call then default will be executed
+     * @param  mixed $length the length of the string 
+     * @param  mixed $keyspace the 
      *
+     * @return mixed // return a string
      */
-
-
     private function randomx_str($length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     {
         $pieces = [];
@@ -53,54 +71,45 @@ class SignupActivate extends Notification
         return implode('', $pieces);
     }
     /**
-     * creating rondom string that is unique in database.
-     *
+     * Creating random string that is unique in database.
+     * the method is a recursive function
+     * if it find a record in the database it call it self
      */
-
-
 
     private function CARD_N()
     {
-
         $Ib = (rand(100000000, 999999999)) . $this->randomx_str(4, 'ABCDEFGHIJKLMNOPRSTWVXYZ');
-        $CARD = Account::where('CARD_NUMBER', $Ib)->first();
-
-        return $CARD ? $this->CARD_N() : $Ib; // reccursive call to create a new Card in database as field need to be unique
-
+        $cardNumber = Account::where('cardNumber', $Ib)->first();
+        return $cardNumber ? $this->CARD_N() : $Ib;
     }
-
-
-
-
-
     /**
-     * Get the mail representation of the notification.
+     * Sending the email.
      *
      * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
     {
-        $pin = rand(1000, 9999);
+        // saving the new card in formation in the data base
+        $pin = rand(1000, 9999); // random string for the pin
         $account = new Account([
 
             'user_id' => $notifiable->id,
-            'CARD_NUMBER' => $this->CARD_N(),
-            'PIN' => bcrypt($pin),
+            'cardNumber' => $this->CARD_N(),
+            'pin' => bcrypt($pin),
             'amount' => 300
-        ]);
+        ]); // account table
 
-        $account->save();// saving card information in datbase
-        $this->PIN = $pin;
-
+        $account->save();// saving card information in database
+        $this->pin = $pin;
 
         $url = url('/api/auth/signup/activate/' . $notifiable->id . '/' . $notifiable->activation_token); // redirect to AuthController with user id and confirmation token
         return (new MailMessage)
             ->subject('Credit card information and account confirmation')
             ->line('Thanks for signup! Please before you begin, you must confirm your account.')
             ->line('Sensetive Information.')
-            ->line('CARD CODE:' . $account->CARD_NUMBER)
-            ->line('PIN:' . $this->PIN)
+            ->line('CARD CODE:' . $account->cardNumber)
+            ->line('PIN:' . $this->pin)
             ->action('Confirm Account', url($url)) // email button
             ->line('Thank you for using our application!');// email setup
     }

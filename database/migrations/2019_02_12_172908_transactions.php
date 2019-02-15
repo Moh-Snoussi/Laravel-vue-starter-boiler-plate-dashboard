@@ -14,6 +14,19 @@ class Transactions extends Migration
     public function up()
     {
         //
+        Schema::create('transactions', function (Blueprint $table){
+        $table->increments('transaction_id');
+            $table->string('sender_id');
+            $table->string('receiver_id');
+            $table->string('sender_cardNumber');
+            $table->string('receiver_cardNumber');
+            $table->integer('amount');
+            $table->string('reference');
+            $table->boolean('success');
+            $table->timestamps();
+       
+        }
+    );
     }
 
     /**
@@ -24,5 +37,6 @@ class Transactions extends Migration
     public function down()
     {
         //
+        Schema::dropIfExists('accounts');
     }
 }

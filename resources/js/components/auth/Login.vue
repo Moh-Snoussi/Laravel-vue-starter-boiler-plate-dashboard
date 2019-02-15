@@ -22,13 +22,16 @@
                 label="Card number"
               />
               <span class="help-block" v-if="errors.cardNumber">{{errors.cardNumber}}</span>
-               <span class="help-block" v-if="errors.response.cardNumber">Your card number is required</span>
+              <span
+                class="help-block"
+                v-if="errors.response.cardNumber"
+              >Your card number is required</span>
             </div>
 
             <div style="margin-top:3rem;">
-              <mdb-input type="text" label="Pin" id="pin" v-model="pin" required block/>
-              <span class="help-block" v-if="errors.response.pin">Your pin is required</span>
-              <span class="help-block" v-if="errors.pin">{{errors.pin}}</span>
+              <mdb-input type="text" label="pin" id="pin" v-model="pin" required block/>
+              <span class="invalid-feedback" v-if="errors.pin">Your pin is required</span>
+              <span class="help-block" v-if="errors.response.pin">{{errors.response.pin}}</span>
             </div>
             <div class="custom-control custom-checkbox mb-3">
               <input
@@ -110,7 +113,7 @@ export default {
       errors: {
         cardNumber: "",
         pin: "",
-        response:{}
+        response: {}
       },
       success: {},
       cardNumber: "",
@@ -138,52 +141,79 @@ export default {
       this.$auth.login({
         url: "/auth/cardlogin", //will get from the base url we defined on the app.js 'http://localhost:8000/api/' to the Larevel API Route
         data: {
-          cardNumber: app.cardNumber, // set the post request 
+          cardNumber: app.cardNumber, // set the post request
           pin: app.pin,
           rememberMe_me: app.rememberMe // this will extend the life of the token
         },
         success: function(res) {
           // handle json response and auth get JWT token as a Bearer
           (app.success = true), (app.message = res.data.message);
+          this.rememberMe ? this.setCookie() : this.setCookie(false);
         },
         error: function(res) {
-          app.errors.response = res.response.data.errors;
+          console.log(res.response.data.errors);
         },
         rememberMeMe: app.rememberMe,
-        redirect: "/dashboard", // if it reach here user has been granted access 
+        redirect: "/dashboard", // if it reach here user has been granted access
         fetchUser: true
       });
       this.isLoading = !this.isLoading; // stop the loader
     },
     /**
+     * setting or deleting the cookies if user check remember me
+     */
+    setCookie(setOrDelete = true) {
+      setOrDelete
+        ? (this.$cookie.set("cardNumber", this.cardNumber, 7),
+          this.$cookie.set("pin", this.pin, 7))
+        : (this.$cookie.delete("cardNumber"), this.$cookie.delete("pin"));
+    },
+    /**
+     * getting the cookies on page load
+     */
+
+    getCookie() {
+      this.cardNumber = this.$cookie.get("cardNumber");
+      this.pin = this.$cookie.get("pin");
+    },
+
+    /**
      * card number validation
-     * this a second layer of validation 
+     * this a second layer of validation
      * Base validation layer leave on the back-end on app/Http/Controllers/AuthController on the login method
      * if parameters true returns cardNumber validation else return pin number validation
-     * cardNumber : check if the first 9 characters are digits and the rest four are alphabetic 
-     * pin : check for four digits number . 
-     */   
-    isValid: (pinOrCard )=>{ 
-      pinOrCard ?
-    !isNaN(this.cardNumber.substring(0, 9)) && isNaN(this.cardNumber.substring(9, 13)) && this.cardNumber.length == 13
-    :
-    !isNaN(this.pin.substring(0, 4)) && this.pin.length == 4
-    }
-    ,
-    /**
-     * this function will prevent submitting the form and validate
+     * cardNumber : check if the first 9 characters are digits and the rest four are alphabetic
+     * pin : check for four digits number .
      */
-    checkForm(event) {
-      console.log(this.isValid(0));
-      
-      // frond-end validation on submit
-      event.preventDefault(); // stop form from sending
-      this.isValid(true) ?  this.isValid(false) ? // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{carNumber error}
-      (event.target.classList.add("was-validated"),this.login()) :
-      this.errors.pin = "Your pin is invalid" : this.errors.cardNumber = "Your card number is invalid"
-       // if is valid then submit
+
+    isValid(pinOrCard) {
+      return pinOrCard
+        ? !isNaN(this.cardNumber.substring(0, 9)) &&
+            isNaN(this.cardNumber.substring(9, 13)) &&
+            this.cardNumber.length == 13
+        : !isNaN(this.pin.substring(0, 4)) && this.pin.length == 4;
     },
-    message: function() {
+    /**
+     * heckForm will prevent submitting the form and validate the pin and the card number
+     */
+
+    checkForm(event) {
+      let valid = 0;
+      // frond-end validation on submit
+      event.preventDefault(); // prevent form from submitting
+      !this.isValid(true)
+        ? (this.errors.cardNumber = "Your card number is invalid")
+        : (this.errors.cardNumber = "");
+      !this.isValid(false)
+        ? (this.errors.pin = "Your pin is invalid")
+        : !this.errors.cardNumber && !this.errors.pin
+        ? (event.target.classList.add("was-validated"), this.login())
+        : (this.errors.pin = ""); // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{cardNumber error}
+      // (event.target.classList.add("was-validated"),this.login()) :
+      // this.errors.pin = "Your pin is invalid" : this.errors.cardNumber = "Your card number is invalid"
+      // if is valid then submit
+    },
+    message() {
       // customized welcome message that is displayed on login page
       const registered =
         typeof this.email !== "undefined"
@@ -199,14 +229,15 @@ export default {
           : "";
       // tenary operation they are like if else (if ? ) and else(:)
       // we check if there is a confirmation query
-      return this.infoMessage =
+
+      return (this.infoMessage =
         typeof this.confirmed !== "undefined" // this way there will be no error if th variable is undefined
           ? this.confirmed == 0
             ? registered // 0 means didn't confirm fresh registered users will land here, the const message will get the infoMessage that we displayed a proper message to the user
             : welcome // this is user is coming from email confirmation so we say welcome back
-          : this.infoMessage; // if nothing from the above condition is true then we dont change the public message
+          : this.infoMessage); // if nothing from the above condition is true then we dont change the public message
     },
-    titleCase: function(str) {
+    titleCase(str) {
       // to turn every first letter of every word capitalized used to display the users name
       var splitStr = str.toLowerCase().split(" ");
       for (var i = 0; i < splitStr.length; i++) {
@@ -219,13 +250,12 @@ export default {
     provider: function(e, pro) {
       // e= event , pro =social provider like google, facebook, github .. they will be redirected to the laravel route
       return (window.location = `provider/login/${pro}`); //redirecting
-    },
+    }
   },
   created() {
     // if the app is created we show a customized welcome message
     this.message();
-    console.log(this.infoMessage);
-    
+    this.getCookie();
   }
 };
 </script>

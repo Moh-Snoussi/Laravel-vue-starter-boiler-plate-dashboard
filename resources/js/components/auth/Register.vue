@@ -67,9 +67,8 @@
   </mdb-container>
 </template>
 <script>
-
 /**
- * Register component 
+ * Register component
  * validate user input and send it as a post request
  */
 import {
@@ -98,13 +97,13 @@ export default {
       message: {},
       isLoading: false,
       errors: {
-        email:'',
-        response:{}
+        email: "",
+        response: {}
       },
       success: false
     };
   },
-  components: { 
+  components: {
     mdbCol,
     mdbInput,
     mdbTextarea,
@@ -118,7 +117,7 @@ export default {
   },
   methods: {
     register() {
-      this.isLoading = true;// show the loader svg
+      this.isLoading = true; // show the loader svg
       var app = this;
       this.$auth.register({
         url: "/auth/signup",
@@ -137,19 +136,21 @@ export default {
         redirect: null
       });
     },
-validateEmail(email) { // validating email with RegExp it returns the email i lower case if it passes the test else returns false
-    return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(String(email).toLowerCase());
-}
-  ,
+    validateEmail(email) {
+      // validating email with RegExp it returns the email i lower case if it passes the test else returns false
+      return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+        String(email).toLowerCase()
+      );
+    },
     provider: (e, pro) => {
       // e= event , pro =social provider like google, facebook, github .. they will be redirected to the laravel route
       return (window.location = `provider/login/${pro}`); // we send to Laravel root depending on the social provider
     },
     checkForm(event) {
       event.preventDefault();
-      this.validateEmail(this.email) ?  
-      (event.target.classList.add("was-validated"),this.register()) :
-      this.errors.email = 'please enter a valid email';
+      this.validateEmail(this.email)
+        ? (event.target.classList.add("was-validated"), this.register())
+        : (this.errors.email = "please enter a valid email");
     }
   }
 };

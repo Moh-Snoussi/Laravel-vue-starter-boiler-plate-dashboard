@@ -13,15 +13,41 @@ use GuzzleHttp\Client;
 use Google_Client;
 use Google_Service_People;
 
+/**
+ * A class responsible for authentication
+ * Methods:
+ * Social registration:
+ *    redirectToProvider
+ *    handelProviderCallback
+ * Registration:
+ *    signup: validate users and save them the database.
+ * User log in: 
+ *    login: not in use 
+ *    loginWithCard
+ * refresh JWT token:
+ *    refresh:
+ * email confirmation clicked:
+ *    signupActivate
+ * get user information
+ *    user
+ * log out
+ *    logout 
+ * saves in users in the database 
+ * this class is called by 
+ * file: route/api.php     route/web.php
+ *
+ * @author Mohamed Snoussi
+ *
+ */
 class AuthController extends Controller
 {
-
-
     private $provider; // facebook, google or github
-
     /**
-     * Redirect the user to the provider authentication page.
-     *
+     * Redirect the user to the provider authentication page the 
+     * client id, client secret, need to be specified in .env file on the root folder.
+     * call back link need to be obtained with all the above information from provider platform.
+     * the method is called from route/web.php 
+     * @param  [provider] google, facebook, github, twitter
      * @return \Illuminate\Http\Response
      */
 
@@ -40,12 +66,11 @@ class AuthController extends Controller
             default:
                 break;
         }
-
     }
-
     /**
      * Obtain the user information from provider.
-     *
+     * this function 
+     * @param  [provider] google, facebook, github, twitter
      * @return \Illuminate\Http\Response
      */
     public function handleProviderCallback($provider)
@@ -55,11 +80,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return redirect(env('PROVIDERS_CALL' . $provider));
         }
-
         $user = User::query()->firstOrNew(['email' => $providerUser->getEmail()]);
-
-
-
     // register (if no user)
     // maybe we can set all the values on our user model if it is new... right now we only have name
     // but you could set other things like avatar or gender
@@ -67,8 +88,6 @@ class AuthController extends Controller
             $user = new User([
                 'name' => $providerUser->getName(),
                 'email' => $providerUser->getEmail(),
-           //
-
                 'comming_from_before_registring' => serialize($_SERVER['HTTP_REFERER']),
                 'device' => serialize($_SERVER['HTTP_USER_AGENT']),
                 'languages' => serialize($_SERVER['HTTP_ACCEPT_LANGUAGE']),
@@ -77,31 +96,22 @@ class AuthController extends Controller
             $user->save();
             $user->notify(new SignupActivate($user));
             return redirect()->route('login', ['email' => $user->email, 'confirmed' => false]);
-
-
-
-
         }
         /*    return response()->json([
-            'success' => true ,'message' => "Successfully registred, we send you credit card information to $user->email . please confirm your email and then login with your new pin and creadit card."
+            'success' => true ,'message' => "Successfully registered, we send you credit card information to $user->email . please confirm your email and then login with your new pin and credit card."
         ], 201);
          */
-
         return redirect()->route('login', ['email' => $user->email, 'confirmed' => true]);
-
     }
-
-
     /**
      * Create user on signup success and send email
-     *
+     * We want to register the user and save as much information as possible ip, device, languages, elc...
      * @param  [string] name
      * @param  [string] email
      * @param  [string] password
      * @param  [string] password_confirmation
-     * @return [string] message
+     * @return //json response // database save 
      */
-
     public function signup(Request $request)
     {
         $request->validate([
@@ -122,12 +132,47 @@ class AuthController extends Controller
         $user->save();
         $user->notify(new SignupActivate($user)); // email is living on App\Notifications\SignupActivate.php
         return response()->json([
-            'success' => true, 'message' => 'Successfully registred, we send you credit card information to your email. please confirm your email and then login with your new pin and creadit card.'
+            'success' => true, 'message' => 'Successfully registered, we send you credit card information to your email. please confirm your email and then login with your new pin and credit card.'
         ], 201); // response 
     }
-
     /**
-     * Login user and create token we will not use on our project but it is usefull for another projects 
+     * Account activated from email.  email is living on app/notification/SignupActive.php 
+     * redirect with welcome message 
+     */
+    /**
+     * Login user and create token we will not use on our project but it is useful for another projects 
+     *
+     * @param  [string] $id // user id
+     * @param  [string] $token // email token
+     * @return void database save and redirect to login rout (in route/api.php)
+     */
+
+    public function signupActivate($id, $token)
+    {
+        $user = User::find($id); // get the user id from the url and search in the database database 
+
+        if ($user['activation_token'] == $token && $token) { // if activation_token field match the token (registering token on line 79)
+            // activating the user and deleting the activation token 
+            $user->active = true; // delete activation token
+            // users already confirmed will not get here because we will lear their activation token
+            $user->activation_token = '';  // clearing of activation token 
+            $account = Account::where('user_id', $user['id'])->first(); // get the account associated with the user from the database
+            $account->Active = true;// user is active 
+            $user->pin = $account->pin;
+            $user->cardNumber = $account->cardNumber;
+            $user->save();
+            // if the user clicked the confirmation link for first time we give him 300 euro 
+            $account->amount = 300;
+            $account->save();
+            return redirect('/login?user=' . $user->name . '&confirmed=1');
+        } else if ($user) {
+            return redirect('/login?user=' . $user->name . '&confirmed=0'); // we send back user name and confirmed
+        }
+
+        return redirect('login');
+    }
+    /**
+     * Login user and create token we will not use on our project but it is useful for another projects 
      *
      * @param  [string] email
      * @param  [string] password
@@ -151,8 +196,9 @@ class AuthController extends Controller
         $user = $request->user();
         if ($user->activation_token) {
             return response()->json([
-                'success' => false,
-                'message' => 'Waiting for confirmation'
+                'error' => [
+                    'message' => 'Waiting for confirmation'
+                ]
             ], 351);
         }
         $tokenResult = $user->createToken(env('JWT_SECRET', 'Personal Access Token'));
@@ -168,66 +214,58 @@ class AuthController extends Controller
             )->toDateTimeString()
         ]);
     }
-
     /**
      * Login user with card number and create token the one we need in our project
      *
-     * @param  [string] CARD_NUMBER
+     * @param  [string] cardNumber
      * @param  [string] password
      * @param  [boolean] remember_me
      * @return [string] access_token
      * @return [string] token_type
      * @return [string] expires_at
      */
-
     public function loginWithCard(Request $request)
     {
-
-
-
         $request->validate([
-            'CARD_NUMBER' => 'required|string',
-            'PIN' => 'required|string',
+            'cardNumber' => 'required|string',
+            'pin' => 'required|string',
             'remember_me' => 'boolean'
         ]); // validation
-        $user = User::where('CARD_NUMBER', $request->only(['CARD_NUMBER']))->first();// get the card code from request and check if the card code in database 
-
+        $user = User::where('cardNumber', $request->only(['cardNumber']))->first();// get the card code from request and check if the card code in database 
         // check authentication    
         if ($user) {
-        // coar number where found
+        // card number where found
         // comparing the hashed pin with the provided pin
-
-            if (password_verify(request(['PIN'][0]), $user->PIN)) {
+            if (password_verify(request(['pin'][0]), $user->pin)) {
             // user authenticated 
-
-
-
                 $tokenResult = $user->createToken(env('JWT_SECRET', 'Personal Access Token')); // creating JWT
                 $token = $tokenResult->token;
                 $token->expires_at = Carbon::now()->addDays(1);
                 if ($request->remember_me)
-                    $token->expires_at = Carbon::now()->addWeeks(1); // adding one week if remeber me 
+                    $token->expires_at = Carbon::now()->addWeeks(1); // adding one week if remember me 
                 $token->save();
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Successfully logged in',
-                    'expires_at' => Carbon::parse(
-                        $tokenResult->token->expires_at
-                    )->toDateTimeString()
+                    'success' => [
+                        'message' => 'Successfully logged in',
+                        'expires_at' => Carbon::parse(
+                            $tokenResult->token->expires_at
+                        )->toDateTimeString()
+                    ]
                 ], 200)->header('Authorization', $tokenResult->accessToken); // response success
             }
         }// authorization failed
         return response()->json([
-            'success' => false,
-            'message' => 'Unauthorized'
+            'errors' => [
+                'message' => 'Unauthorized'
+            ]
         ], 401);
     }
 
     /**
-     * refresh token for api authorization 
-     *
+     * refresh token for api authorization
+     * @param  [$request] current request
+     * @return [json] refresh json web token
      */
-
     public function refresh(Request $request)
     {
         $http = new Client;
@@ -243,61 +281,22 @@ class AuthController extends Controller
         return json_decode((string)$response->getBody(), true);
     }
 
-
-
-
-
-    /**
-     * Acount activated from email.  email is living on app/notification/SignupActive.php 
-     * redirect with welcome message 
-     */
-
-    public function signupActivate($id, $token)
-    {
-
-        $user = User::find($id); // get the user id from the url and search in the database database 
-
-        if ($user['activation_token'] == $token && $token) { // if activation_token field match the token (registering token on line 79)
-
-            $user->active = true; // delete activation_token
-            $user->activation_token = '';  // delete activation_token 
-            $account = Account::where('user_id', $user['id'])->first(); // get the account assosiated with the user from the database
-            $account->Active = true;
-            $user->PIN = $account->PIN;
-            $user->CARD_NUMBER = $account->CARD_NUMBER;
-            $account->save();
-            $user->save();
-
-            return redirect('/login?user=' . $user->name . '&confirmed=1');
-        } else if ($user) {
-            return redirect('/login?user=' . $user->name . '&confirmed=1'); // we send back user name and confirmed
-        }
-
-        return redirect('login');
-
-    }
-
     /**
      * Get the authenticated User
-     *
+     * @param  [$request] current request
      * @return [json] user object
      */
     public function user(Request $request)
     {
         return response()->json($request->user());
     }
-
-
-
-
     /**
      * Logout user (Revoke the token)
-     *
-     * @return [string] message
+     * @param  [$request] current request
+     * @return [json] response with statue 205
      */
     public function logout(Request $request)
     {
-
         $accessToken = $this->auth->user()->token(); // get token from response
         $refreshToken = $this->db
             ->table('oauth_refresh_tokens')
@@ -308,11 +307,11 @@ class AuthController extends Controller
         $accessToken->revoke();
         $this->cookie->queue($this->cookie->forget(self::REFRESH_TOKEN)); // forget token from cookie 
 
-
         return response()->json([
-            'success' => true,
-            'message' => 'Successfully logged out'
-        ], 205);// response sucess
+            'success' => [
+                'message' => 'Successfully logged out'
+            ]
+        ], 205);// response success
     }
 
 }

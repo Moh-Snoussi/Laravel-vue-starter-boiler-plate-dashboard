@@ -13,6 +13,9 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
+var VueCookie = require('vue-cookie');
+// Tell Vue to use the plugin
+
 // front-end libraries
 import 'bootstrap-css-only/css/bootstrap.min.css'; // only bootstrap css , no jquery
 import 'mdbvue/build/css/mdb.css'; // the best for frond-end
@@ -70,6 +73,7 @@ Vue.router = router
 Vue.use(VueAxios, axios);
 axios.defaults.baseURL = 'http://localhost:8000/api/';
 
+Vue.use(VueCookie);
 
 /**
  * setting up the security
@@ -84,7 +88,7 @@ Vue.use(require('@websanova/vue-auth'), {
 App.router = Vue.router
 
 /**
- * get the div with id #app and mouting all the app
+ * get the div with id #app and mounting all the app
  */
 new Vue(App).$mount('#app');
 

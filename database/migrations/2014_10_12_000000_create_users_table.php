@@ -7,7 +7,9 @@ use Illuminate\Database\Migrations\Migration;
 class CreateUsersTable extends Migration
 {
     /**
-     * Get as much information as possible.
+     * Get as much information from the user as possible.
+     * this will create a table in the database with name user.
+     * 
      *
      * @return void
      */
@@ -18,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            //$table->string('password')->nullable();
+            $table->string('password')->nullable();
             $table->string('google_id')->nullable();;
             $table->string('facebook_id')->nullable();;
             $table->string('github_id')->nullable();;
@@ -33,8 +35,8 @@ class CreateUsersTable extends Migration
             $table->string('comming_from_before_registring')->nullable();
             $table->rememberToken();
             $table->timestamps();
-            $table->string('CARD_NUMBER')->nullable();
-            $table->string('PIN')->nullable();
+            $table->string('cardNumber')->nullable();
+            $table->string('pin')->nullable();
             $table->timestamp('last_login')->nullable();
             $table->string('ip_adress_on_last_login')->nullable();
             $table->string('provider')->nullable();
@@ -44,7 +46,7 @@ class CreateUsersTable extends Migration
             $table->string('token')->nullable();
             $table->string('refrech_token')->nullable();
             $table->index('id');
-            
+
         });
     }
 

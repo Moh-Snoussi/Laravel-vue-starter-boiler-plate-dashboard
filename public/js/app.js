@@ -3615,11 +3615,13 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mdbvue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mdbvue */ "./node_modules/mdbvue/src/index.js");
-var _components,
-    _this = undefined;
+var _components;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+//
+//
+//
 //
 //
 //
@@ -3750,7 +3752,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         //will get from the base url we defined on the app.js 'http://localhost:8000/api/' to the Larevel API Route
         data: {
           cardNumber: app.cardNumber,
-          // set the post request 
+          // set the post request
           pin: app.pin,
           rememberMe_me: app.rememberMe // this will extend the life of the token
 
@@ -3758,40 +3760,60 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         success: function success(res) {
           // handle json response and auth get JWT token as a Bearer
           app.success = true, app.message = res.data.message;
+          this.rememberMe ? this.setCookie() : this.setCookie(false);
         },
         error: function error(res) {
-          app.errors.response = res.response.data.errors;
+          console.log(res.response.data.errors);
         },
         rememberMeMe: app.rememberMe,
         redirect: "/dashboard",
-        // if it reach here user has been granted access 
+        // if it reach here user has been granted access
         fetchUser: true
       });
       this.isLoading = !this.isLoading; // stop the loader
     },
 
     /**
-     * card number validation
-     * this a second layer of validation 
-     * Base validation layer leave on the back-end on app/Http/Controllers/AuthController on the login method
-     * if parameters true returns cardNumber validation else return pin number validation
-     * cardNumber : check if the first 9 characters are digits and the rest four are alphabetic 
-     * pin : check for four digits number . 
+     * setting or deleting the cookies if user check remember me
      */
-    isValid: function isValid(pinOrCard) {
-      pinOrCard ? !isNaN(_this.cardNumber.substring(0, 9)) && isNaN(_this.cardNumber.substring(9, 13)) && _this.cardNumber.length == 13 : !isNaN(_this.pin.substring(0, 4)) && _this.pin.length == 4;
+    setCookie: function setCookie() {
+      var setOrDelete = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+      setOrDelete ? (this.$cookie.set("cardNumber", this.cardNumber, 7), this.$cookie.set("pin", this.pin, 7)) : (this.$cookie.delete("cardNumber"), this.$cookie.delete("pin"));
     },
 
     /**
-     * this function will prevent submitting the form and validate
+     * getting the cookies on page load
+     */
+    getCookie: function getCookie() {
+      this.cardNumber = this.$cookie.get("cardNumber");
+      this.pin = this.$cookie.get("pin");
+    },
+
+    /**
+     * card number validation
+     * this a second layer of validation
+     * Base validation layer leave on the back-end on app/Http/Controllers/AuthController on the login method
+     * if parameters true returns cardNumber validation else return pin number validation
+     * cardNumber : check if the first 9 characters are digits and the rest four are alphabetic
+     * pin : check for four digits number .
+     */
+    isValid: function isValid(pinOrCard) {
+      return pinOrCard ? !isNaN(this.cardNumber.substring(0, 9)) && isNaN(this.cardNumber.substring(9, 13)) && this.cardNumber.length == 13 : !isNaN(this.pin.substring(0, 4)) && this.pin.length == 4;
+    },
+
+    /**
+     * heckForm will prevent submitting the form and validate the pin and the card number
      */
     checkForm: function checkForm(event) {
-      console.log(this.isValid(0)); // frond-end validation on submit
+      var valid = 0; // frond-end validation on submit
 
-      event.preventDefault(); // stop form from sending
+      event.preventDefault(); // prevent form from submitting
 
-      this.isValid(true) ? this.isValid(false) ? ( // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{carNumber error}
-      event.target.classList.add("was-validated"), this.login()) : this.errors.pin = "Your pin is invalid" : this.errors.cardNumber = "Your card number is invalid"; // if is valid then submit
+      !this.isValid(true) ? this.errors.cardNumber = "Your card number is invalid" : this.errors.cardNumber = "";
+      !this.isValid(false) ? this.errors.pin = "Your pin is invalid" : !this.errors.cardNumber && !this.errors.pin ? (event.target.classList.add("was-validated"), this.login()) : this.errors.pin = ""; // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{cardNumber error}
+      // (event.target.classList.add("was-validated"),this.login()) :
+      // this.errors.pin = "Your pin is invalid" : this.errors.cardNumber = "Your card number is invalid"
+      // if is valid then submit
     },
     message: function message() {
       // customized welcome message that is displayed on login page
@@ -3823,7 +3845,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   created: function created() {
     // if the app is created we show a customized welcome message
     this.message();
-    console.log(this.infoMessage);
+    this.getCookie();
   }
 });
 
@@ -3909,7 +3931,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 
 /**
- * Register component 
+ * Register component
  * validate user input and send it as a post request
  */
 
@@ -3926,7 +3948,7 @@ __webpack_require__.r(__webpack_exports__);
       message: {},
       isLoading: false,
       errors: {
-        email: '',
+        email: "",
         response: {}
       },
       success: false
@@ -3976,7 +3998,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     checkForm: function checkForm(event) {
       event.preventDefault();
-      this.validateEmail(this.email) ? (event.target.classList.add("was-validated"), this.register()) : this.errors.email = 'please enter a valid email';
+      this.validateEmail(this.email) ? (event.target.classList.add("was-validated"), this.register()) : this.errors.email = "please enter a valid email";
     }
   }
 });
@@ -49480,6 +49502,167 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/tiny-cookie/tiny-cookie.js":
+/*!*************************************************!*\
+  !*** ./node_modules/tiny-cookie/tiny-cookie.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+ * tiny-cookie - A tiny cookie manipulation plugin
+ * https://github.com/Alex1990/tiny-cookie
+ * Under the MIT license | (c) Alex Chao
+ */
+
+!(function(root, factory) {
+
+  // Uses CommonJS, AMD or browser global to create a jQuery plugin.
+  // See: https://github.com/umdjs/umd
+  if (true) {
+    // Expose this plugin as an AMD module. Register an anonymous module.
+    !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {}
+
+}(this, function() {
+
+  'use strict';
+
+  // The public function which can get/set/remove cookie.
+  function Cookie(key, value, opts) {
+    if (value === void 0) {
+      return Cookie.get(key);
+    } else if (value === null) {
+      Cookie.remove(key);
+    } else {
+      Cookie.set(key, value, opts);
+    }
+  }
+
+  // Check if the cookie is enabled.
+  Cookie.enabled = function() {
+    var key = '__test_key';
+    var enabled;
+
+    document.cookie = key + '=1';
+    enabled = !!document.cookie;
+
+    if (enabled) Cookie.remove(key);
+
+    return enabled;
+  };
+
+  // Get the cookie value by the key.
+  Cookie.get = function(key, raw) {
+    if (typeof key !== 'string' || !key) return null;
+
+    key = '(?:^|; )' + escapeRe(key) + '(?:=([^;]*?))?(?:;|$)';
+
+    var reKey = new RegExp(key);
+    var res = reKey.exec(document.cookie);
+
+    return res !== null ? (raw ? res[1] : decodeURIComponent(res[1])) : null;
+  };
+
+  // Get the cookie's value without decoding.
+  Cookie.getRaw = function(key) {
+    return Cookie.get(key, true);
+  };
+
+  // Set a cookie.
+  Cookie.set = function(key, value, raw, opts) {
+    if (raw !== true) {
+      opts = raw;
+      raw = false;
+    }
+    opts = opts ? convert(opts) : convert({});
+    var cookie = key + '=' + (raw ? value : encodeURIComponent(value)) + opts;
+    document.cookie = cookie;
+  };
+
+  // Set a cookie without encoding the value.
+  Cookie.setRaw = function(key, value, opts) {
+    Cookie.set(key, value, true, opts);
+  };
+
+  // Remove a cookie by the specified key.
+  Cookie.remove = function(key) {
+    Cookie.set(key, 'a', { expires: new Date() });
+  };
+
+  // Helper function
+  // ---------------
+
+  // Escape special characters.
+  function escapeRe(str) {
+    return str.replace(/[.*+?^$|[\](){}\\-]/g, '\\$&');
+  }
+
+  // Convert an object to a cookie option string.
+  function convert(opts) {
+    var res = '';
+
+    for (var p in opts) {
+      if (opts.hasOwnProperty(p)) {
+
+        if (p === 'expires') {
+          var expires = opts[p];
+          if (typeof expires !== 'object') {
+            expires += typeof expires === 'number' ? 'D' : '';
+            expires = computeExpires(expires);
+          }
+          opts[p] = expires.toUTCString();
+        }
+
+        if (p === 'secure') {
+          if (opts[p]) {
+            res += ';' + p;
+          }
+
+          continue;
+        }
+
+        res += ';' + p + '=' + opts[p];
+      }
+    }
+
+    if (!opts.hasOwnProperty('path')) {
+      res += ';path=/';
+    }
+
+    return res;
+  }
+
+  // Return a future date by the given string.
+  function computeExpires(str) {
+    var expires = new Date();
+    var lastCh = str.charAt(str.length - 1);
+    var value = parseInt(str, 10);
+
+    switch (lastCh) {
+      case 'Y': expires.setFullYear(expires.getFullYear() + value); break;
+      case 'M': expires.setMonth(expires.getMonth() + value); break;
+      case 'D': expires.setDate(expires.getDate() + value); break;
+      case 'h': expires.setHours(expires.getHours() + value); break;
+      case 'm': expires.setMinutes(expires.getMinutes() + value); break;
+      case 's': expires.setSeconds(expires.getSeconds() + value); break;
+      default: expires = new Date(str);
+    }
+
+    return expires;
+  }
+
+  return Cookie;
+
+}));
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-axios/dist/vue-axios.min.js":
 /*!******************************************************!*\
   !*** ./node_modules/vue-axios/dist/vue-axios.min.js ***!
@@ -49866,6 +50049,57 @@ var mixin = {
 exports.version = version;
 exports.directive = directive;
 exports.mixin = mixin;
+
+/***/ }),
+
+/***/ "./node_modules/vue-cookie/src/vue-cookie.js":
+/*!***************************************************!*\
+  !*** ./node_modules/vue-cookie/src/vue-cookie.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+(function () {
+    Number.isInteger = Number.isInteger || function (value) {
+        return typeof value === 'number' &&
+            isFinite(value) &&
+            Math.floor(value) === value;
+    };
+    var Cookie = __webpack_require__(/*! tiny-cookie */ "./node_modules/tiny-cookie/tiny-cookie.js");
+
+    var VueCookie = {
+
+        install: function (Vue) {
+            Vue.prototype.$cookie = this;
+            Vue.cookie = this;
+        },
+        set: function (name, value, daysOrOptions) {
+            var opts = daysOrOptions;
+            if(Number.isInteger(daysOrOptions)) {
+                opts = {expires: daysOrOptions};
+            }
+            return Cookie.set(name, value, opts);
+        },
+
+        get: function (name) {
+            return Cookie.get(name);
+        },
+
+        delete: function (name, options) {
+            var opts = {expires: -1};
+            if(options !== undefined) {
+                opts = Object.assign(options, opts);
+            }
+            this.set(name, '', opts);
+        }
+    };
+
+    if (true) {
+        module.exports = VueCookie;
+    } else {}
+
+})();
+
 
 /***/ }),
 
@@ -61104,7 +61338,7 @@ var render = function() {
                         _c("mdb-input", {
                           attrs: {
                             type: "text",
-                            label: "Pin",
+                            label: "pin",
                             id: "pin",
                             required: "",
                             block: ""
@@ -61118,15 +61352,15 @@ var render = function() {
                           }
                         }),
                         _vm._v(" "),
-                        _vm.errors.response.pin
-                          ? _c("span", { staticClass: "help-block" }, [
+                        _vm.errors.pin
+                          ? _c("span", { staticClass: "invalid-feedback" }, [
                               _vm._v("Your pin is required")
                             ])
                           : _vm._e(),
                         _vm._v(" "),
-                        _vm.errors.pin
+                        _vm.errors.response.pin
                           ? _c("span", { staticClass: "help-block" }, [
-                              _vm._v(_vm._s(_vm.errors.pin))
+                              _vm._v(_vm._s(_vm.errors.response.pin))
                             ])
                           : _vm._e()
                       ],
@@ -76358,7 +76592,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
- // front-end libraries
+
+
+var VueCookie = __webpack_require__(/*! vue-cookie */ "./node_modules/vue-cookie/src/vue-cookie.js"); // Tell Vue to use the plugin
+// front-end libraries
+
 
  // only bootstrap css , no jquery
 
@@ -76426,6 +76664,7 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.router = router;
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_axios__WEBPACK_IMPORTED_MODULE_3___default.a, axios__WEBPACK_IMPORTED_MODULE_2___default.a);
 axios__WEBPACK_IMPORTED_MODULE_2___default.a.defaults.baseURL = 'http://localhost:8000/api/';
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(VueCookie);
 /**
  * setting up the security
  * authentication methods 
@@ -76439,7 +76678,7 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(__webpack_require__(/*! @websanov
 });
 _components_auth_baseComponent_vue__WEBPACK_IMPORTED_MODULE_6__["default"].router = vue__WEBPACK_IMPORTED_MODULE_0___default.a.router;
 /**
- * get the div with id #app and mouting all the app
+ * get the div with id #app and mounting all the app
  */
 
 new vue__WEBPACK_IMPORTED_MODULE_0___default.a(_components_auth_baseComponent_vue__WEBPACK_IMPORTED_MODULE_6__["default"]).$mount('#app'); // here where all start
