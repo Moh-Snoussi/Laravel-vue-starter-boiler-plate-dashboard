@@ -54,7 +54,7 @@ to install execute the following commands get the data on your machine.
     ```php artisan serve```
 11. To edit the vue files and see the change on browser as soon as you save then in another terminal on the project directory run:
 
-   ```npm run watch -- --watch-poll```
+    ```npm run watch -- --watch-poll```
 
 
 
