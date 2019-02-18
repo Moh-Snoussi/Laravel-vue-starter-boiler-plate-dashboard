@@ -1,6 +1,12 @@
 <template>
   <div id="app" class="flyout">
-    <mdb-navbar dark position="top" class="default-color" scrolling :scrollingOffset="20">
+       <div v-if="!$auth.ready()" >Loading
+    <object  id="loader" data="svg/circles.svg"></object>
+    </div>
+    <div v-if="$auth.ready()">
+     
+    <sidebar-menu style="z-index: 10;" @collapse="handelCollapse()" v-if="$auth.check()" :menu="menu" />
+    <mdb-navbar v-if="!$auth.check()" dark position="top" class="default-color" scrolling :scrollingOffset="20">
       <mdb-navbar-brand to="/" waves style="font-weight: bolder;">ATM</mdb-navbar-brand>
       <mdb-navbar-toggler>
         <mdb-navbar-nav right>
@@ -15,8 +21,9 @@
     <main :style="{marginTop: '60px'}">
       <router-view></router-view>
     </main>
+    </div>
+ 
 
-    <FooterPage footer-expand-lg color="default-color"></FooterPage>
   </div>
 </template>
 
@@ -25,23 +32,27 @@
  * baseComponent is the route in action
  * checks authentication before redirect
  * it redirects to the name of the router that are defined on app.js
- * the only method we need here is log out defined on loggingout method
+ * this is base component always on 
  *
  */
+import { SidebarMenu } from './../sidebar'
+import Avatar from "./../sidebar/Avatar";
+import profileName from "./../sidebar/profileName";
 
 import {
   mdbNavbar,
   mdbNavItem,
   mdbNavbarNav,
   mdbNavbarToggler,
-  mdbNavbarBrand
+  mdbNavbarBrand,
 } from "mdbvue";
 
 import FooterPage from "./../Footer";
+import { async } from 'q';
 export default {
   name: "app",
   data: {
-    website: "somekindofwebsite"
+    collapse:false
   },
 
   components: {
@@ -50,21 +61,72 @@ export default {
     mdbNavbarNav,
     mdbNavbarToggler,
     mdbNavbarBrand,
-    FooterPage
-  },
+    FooterPage,
+    SidebarMenu
+  },data() { 
+            return {
+              collapse: false,
+                menu: [ // assigning side bar data 
+                    {
+                        header: true,
+                        component: Avatar ,
+                         visibleOnCollapse: true,
+                      
+                    },
+                    {
+                        header: true,
+                        tittle : '' ,
+                         visibleOnCollapse: false
+                    },
+                    {
+                        href: '/dashboard/balance',
+                        title: 'Dashboard',
+                        icon: 'fa fa-user',
+                        
+                        
+                    }, {
+                        title: 'Deposit',
+                        icon: 'fa fa-file-import',
+                       
+                    },
+                    {
+                        title: 'Withdraw',
+                        icon: 'fa fa-file-export',
+                       
+                    },
+                    
+                    {
+                        title: 'Transaction',
+                        icon: 'fa fa-share-square',
+                       
+                    },
+                    {
+                        title: 'History',
+                        icon: 'fa fa-list-alt',
+                        href: '/dashboard/history'
+                       
+                    },{
+                        title: 'Log out',
+                        icon: 'fa fa-door-open',
+                        href: '/logout'
+                       
+                    }
+                ]
+            }
+        },
   methods: {
-    // logout method
-    loggingout: function() {
-      this.$auth.logout({
-        makeRequest: true,
-        params: {}, // data: {} in axios
-        success: function() {},
-        error: function() {},
-        url: "api/auth/logout", // logout from controller and revoke token from datbase
-        redirect: "/"
-      });
+    /**
+     * getting the props from child component and assigned to this component data 
+     * editing the url to handel menu collapse from other component qs yell 
+     */
+    handelCollapse() {
+    this.collapse = !this.collapse;
+   this.$router.push(`/dashboard?collapse=${this.collapse}`)
     }
+  
+    
   }
+  
 };
 </script>
 

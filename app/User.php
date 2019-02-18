@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'ip_adress_on_registration','languages','device','comming_from_before_registring', 'active', 'activation_token'
+        'name', 'email','familyName', 'givenName', 'password','provider','providerId','avatar', 'lastLoginDate','rememberToken','refreshToken','ipAddressOnRegistration','ipAddressOnLastLogin','languages','deviceOnRegistration','deviceOnLastLogin','comingFromBeforeRegistering','comingFromBeforeLastLogin', 'active', 'activationToken','lastLoginDate','apiToken','emailVerifiedAt'
     ];
 
     /**
@@ -29,7 +29,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password','cardNumber','pin', 'remember_token' , 'activation_token'
+        'password','providerId','cardNumber','pin','lastLoginDate', 'rememberToken' ,'refreshToken', 'ipAddressOnRegistration','ipAddressOnLastLogin','languages','deviceOnRegistration','deviceOnLastLogin','comingFromBeforeRegistering','comingFromBeforeLastLogin', 'activationToken','apiToken','emailVerifiedAt'
     ];
 
     /**

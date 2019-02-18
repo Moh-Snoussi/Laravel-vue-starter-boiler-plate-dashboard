@@ -33,6 +33,7 @@ to install execute the following commands get the data on your machine.
 6. Modify the new .env
 
    .Enter your database credentials 
+   
    .Enter your email credentials and server settings (you can get for free from https://mailtrap.io)
 
    .Optional set up a client id and client secret for any provider you choose

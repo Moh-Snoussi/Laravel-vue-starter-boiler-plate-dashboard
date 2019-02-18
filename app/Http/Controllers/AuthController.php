@@ -86,22 +86,32 @@ class AuthController extends Controller
     // but you could set other things like avatar or gender
         if (!$user->exists) {
             $user = new User([
+                'provider' => $provider,
                 'name' => $providerUser->getName(),
                 'email' => $providerUser->getEmail(),
-                'comming_from_before_registring' => serialize($_SERVER['HTTP_REFERER']),
-                'device' => serialize($_SERVER['HTTP_USER_AGENT']),
+                'avatar' => $providerUser->getAvatar(),
+                'familyName' => $providerUser['name']['familyName'],
+                'givenName' => $providerUser['name']['givenName'],
+                'providerId' => $providerUser->getId(),
+                'comingFromBeforeRegistering' => serialize($_SERVER['HTTP_REFERER']),
+                'ipAddressOnRegistration' => serialize($_SERVER['REMOTE_ADDR']),
+                'deviceOnRegistration' => serialize($_SERVER['HTTP_USER_AGENT']),
                 'languages' => serialize($_SERVER['HTTP_ACCEPT_LANGUAGE']),
-                'activation_token' => str_random(60)
+                'activationToken' => str_random(60)
             ]);
             $user->save();
             $user->notify(new SignupActivate($user));
             return redirect()->route('login', ['email' => $user->email, 'confirmed' => false]);
+        } else {
+
+            $user->comingFromBeforeLastLogin = serialize($_SERVER['HTTP_REFERER']);
+            $user->deviceOnLastLogin = serialize($_SERVER['HTTP_USER_AGENT']);
+            $user->ipAddressOnLastLogin = serialize($_SERVER['REMOTE_ADDR']);
+            $user->lastLoginDate = date('Y-m-d G:i:s');
+            $user->save();
         }
-        /*    return response()->json([
-            'success' => true ,'message' => "Successfully registered, we send you credit card information to $user->email . please confirm your email and then login with your new pin and credit card."
-        ], 201);
-         */
-        return redirect()->route('login', ['email' => $user->email, 'confirmed' => true]);
+
+        return redirect()->route('login', ['user' => $user->name, 'confirmed' => true]);
     }
     /**
      * Create user on signup success and send email
@@ -123,11 +133,11 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             //'password' => bcrypt($request->password),
-            'ip_adress_on_registration' => serialize($request->getClientIps()),
-            'comming_from_before_registring' => serialize($request->header('HTTP_REFERER')),
-            'device' => serialize($request->userAgent()),
+            'comingFromBeforeRegistering' => serialize($request->header('HTTP_REFERER')),
+            'ipAddressOnRegistration' => serialize($request->getClientIps()),
+            'deviceOnRegistration' => serialize($request->userAgent()),
             'languages' => serialize($request->getLanguages()),
-            'activation_token' => str_random(60)
+            'activationToken' => str_random(60)
         ]); // save user in database
         $user->save();
         $user->notify(new SignupActivate($user)); // email is living on App\Notifications\SignupActivate.php
@@ -151,13 +161,15 @@ class AuthController extends Controller
     {
         $user = User::find($id); // get the user id from the url and search in the database database 
 
-        if ($user['activation_token'] == $token && $token) { // if activation_token field match the token (registering token on line 79)
+        if ($user['activationToken'] == $token && $token) { // if activation_token field match the token (registering token on line 79)
             // activating the user and deleting the activation token 
             $user->active = true; // delete activation token
             // users already confirmed will not get here because we will lear their activation token
-            $user->activation_token = '';  // clearing of activation token 
+            $user->activationToken = '';
+            $user->emailVerifiedAt = date('Y-m-d G:i:s');;  // clearing of activation token 
             $account = Account::where('user_id', $user['id'])->first(); // get the account associated with the user from the database
             $account->Active = true;// user is active 
+
             $user->pin = $account->pin;
             $user->cardNumber = $account->cardNumber;
             $user->save();
@@ -186,7 +198,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
-            'remember_me' => 'boolean'
+            'rememberMe' => 'boolean'
         ]);// login validation 
         $credentials = request(['email', 'password']);
         if (!Auth::attempt($credentials))
@@ -196,7 +208,7 @@ class AuthController extends Controller
         $user = $request->user();
         if ($user->activation_token) {
             return response()->json([
-                'error' => [
+                'errors' => [
                     'message' => 'Waiting for confirmation'
                 ]
             ], 351);
@@ -229,11 +241,12 @@ class AuthController extends Controller
         $request->validate([
             'cardNumber' => 'required|string',
             'pin' => 'required|string',
-            'remember_me' => 'boolean'
+            'rememberMe' => 'boolean'
         ]); // validation
         $user = User::where('cardNumber', $request->only(['cardNumber']))->first();// get the card code from request and check if the card code in database 
         // check authentication    
         if ($user) {
+           
         // card number where found
         // comparing the hashed pin with the provided pin
             if (password_verify(request(['pin'][0]), $user->pin)) {
@@ -244,6 +257,9 @@ class AuthController extends Controller
                 if ($request->remember_me)
                     $token->expires_at = Carbon::now()->addWeeks(1); // adding one week if remember me 
                 $token->save();
+                $user->ipAddressOnLastLogin = serialize($request->getClientIps());
+                $user->comingFromBeforeLogin = serialize($request->header('HTTP_REFERER'));
+                $user->deviceOnLastLogin = serialize($request->userAgent());
                 return response()->json([
                     'success' => [
                         'message' => 'Successfully logged in',
@@ -254,11 +270,26 @@ class AuthController extends Controller
                 ], 200)->header('Authorization', $tokenResult->accessToken); // response success
             }
         }// authorization failed
-        return response()->json([
+        // we check if user didn't confirm his email and provide a better error 
+
+        $account = Account::where('cardNumber', $request->only(['cardNumber']))->first(); // we check if the card number is correct
+
+        // we check if the provided pin is correct otherwise we send an Unauthorized message with a 401 response  
+        return ($account && password_verify(request(['pin'][0]), $account->pin))
+            ?
+            response()->json([
+            'errors' => [
+                'message' => 'Awaiting confirmation.',
+                'details' => 'You may need to confirm your email.'
+            ]
+        ], 351)
+            :
+            response()->json([
             'errors' => [
                 'message' => 'Unauthorized'
             ]
         ], 401);
+
     }
 
     /**
@@ -288,7 +319,7 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json(['data' => $request->user()]);
     }
     /**
      * Logout user (Revoke the token)

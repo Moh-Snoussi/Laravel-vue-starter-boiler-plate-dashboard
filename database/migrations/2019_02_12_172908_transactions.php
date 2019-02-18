@@ -15,15 +15,17 @@ class Transactions extends Migration
     {
         //
         Schema::create('transactions', function (Blueprint $table){
-        $table->increments('transaction_id');
-            $table->string('sender_id');
-            $table->string('receiver_id');
-            $table->string('sender_cardNumber');
-            $table->string('receiver_cardNumber');
-            $table->integer('amount');
+        $table->increments('id');
+        $table->timestamps();
+            $table->string('cardNumber');
+            $table->string('userId');
+            $table->string('currentBalance');
+            $table->string('operation');
+            $table->string('secondPartyCardNumber')->nullable();
+            $table->string('secondPartyName')->nullable();
+            $table->string('amount');
             $table->string('reference');
-            $table->boolean('success');
-            $table->timestamps();
+            
        
         }
     );

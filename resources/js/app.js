@@ -19,12 +19,26 @@ var VueCookie = require('vue-cookie');
 // front-end libraries
 import 'bootstrap-css-only/css/bootstrap.min.css'; // only bootstrap css , no jquery
 import 'mdbvue/build/css/mdb.css'; // the best for frond-end
+
+import VueGoodTablePlugin from 'vue-good-table';
+ 
+// import the styles 
+import 'vue-good-table/dist/vue-good-table.css'
+ 
+Vue.use(VueGoodTablePlugin);
+
+
+import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
+
+
 // components
 import App from './components/auth/baseComponent.vue';
-import Home from './components/auth/Home.vue';
+import Logout from './components/auth/Logout.vue';
 import Register from './components/auth/Register.vue';
 import Login from './components/auth/Login.vue';
-import Dashboard from './components/Dashboard.vue'; // only authenticated user get access to this 
+
+import Table from './components/dashboard/Table.vue';
+import Dashboard from './components/dashboard/Dashboard.vue'; // only authenticated user get access to this 
 
 /**
  * initializing the router 
@@ -33,13 +47,14 @@ import Dashboard from './components/Dashboard.vue'; // only authenticated user g
  * name : name of the router that we later direct to the corresponding router (see auth/baseComponent.vue)
  * component : the component that is associated with the route
  */
+
 Vue.use(VueRouter);
 
 const router = new VueRouter({
     routes: [{
         path: '/',
         name: 'home',
-        component: Home
+        component: Login
     }, {
         path: '/register',
         name: 'register',
@@ -56,13 +71,29 @@ const router = new VueRouter({
             auth: false
         }
     }, {
-        path: '/dashboard',
+        path: '/dashboard:id',
         name: 'dashboard',
         component: Dashboard,
         meta: {
             auth: true // only authorized user
+        }},
+        {
+            path: '/logout',
+            name: 'logout',
+            component: Logout,
+            meta: {
+                auth: true // only authorized user
+            }
+    },
+    {
+        path: '/dashboard/history',
+        name: 'Table',
+        component: Table,
+        meta: {
+            auth: true // only authorized user
         }
-    }],
+}
+],
     mode: 'history' // to have lean url without '#'
 });
 Vue.router = router

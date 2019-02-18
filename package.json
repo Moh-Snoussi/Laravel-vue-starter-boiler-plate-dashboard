@@ -33,11 +33,15 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.14",
     "@fortawesome/free-solid-svg-icons": "^5.7.1",
     "@fortawesome/vue-fontawesome": "^0.1.5",
+    "@myena/vue-table": "^0.7.4",
     "bootstrap-css-only": "^4.2.1",
     "dotenv": "^6.2.0",
     "gsap": "^2.0.2",
     "mdbvue": "^5.1.0",
+    "vue-avatar": "^2.1.7",
     "vue-cookie": "^1.1.4",
+    "vue-good-table": "^2.16.0",
+    "vue-sidebar-menu": "^3.6.0",
     "vue-tree-nav": "0.0.11"
   }
 }

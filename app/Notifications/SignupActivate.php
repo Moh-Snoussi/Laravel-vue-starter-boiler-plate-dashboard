@@ -103,7 +103,7 @@ class SignupActivate extends Notification
         $account->save();// saving card information in database
         $this->pin = $pin;
 
-        $url = url('/api/auth/signup/activate/' . $notifiable->id . '/' . $notifiable->activation_token); // redirect to AuthController with user id and confirmation token
+        $url = url('/api/auth/signup/activate/' . $notifiable->id . '/' . $notifiable->activationToken); // redirect to AuthController with user id and confirmation token
         return (new MailMessage)
             ->subject('Credit card information and account confirmation')
             ->line('Thanks for signup! Please before you begin, you must confirm your account.')
