@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\ThrottlesLogins;
 use GuzzleHttp\Client;
 use Google_Client;
 use Google_Service_People;
+use Laravel\Passport\HasApiTokens;
 
 /**
  * A class responsible for authentication
@@ -41,6 +42,7 @@ use Google_Service_People;
  */
 class AuthController extends Controller
 {
+    use HasApiTokens;
     private $provider; // facebook, google or github
     /**
      * Redirect the user to the provider authentication page the 
@@ -299,17 +301,8 @@ class AuthController extends Controller
      */
     public function refresh(Request $request)
     {
-        $http = new Client;
-        $response = $http->post('http://your-app.com/oauth/token', [
-            'form_params' => [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => 'the-refresh-token',
-                'client_id' => 'client-id',
-                'client_secret' => 'client-secret',
-                'scope' => '',
-            ],
-        ]);
-        return json_decode((string)$response->getBody(), true);
+
+        return response()->json([$request->user()], 200);
     }
 
     /**
@@ -328,15 +321,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $accessToken = $this->auth->user()->token(); // get token from response
-        $refreshToken = $this->db
-            ->table('oauth_refresh_tokens')
-            ->where('access_token_id', $accessToken->id)
-            ->update([
-                'revoked' => true
-            ]); // revoke token from data base
-        $accessToken->revoke();
-        $this->cookie->queue($this->cookie->forget(self::REFRESH_TOKEN)); // forget token from cookie 
+        auth('web')->logout();// forget token from cookie 
 
         return response()->json([
             'success' => [

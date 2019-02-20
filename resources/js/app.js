@@ -21,24 +21,31 @@ import 'bootstrap-css-only/css/bootstrap.min.css'; // only bootstrap css , no jq
 import 'mdbvue/build/css/mdb.css'; // the best for frond-end
 
 import VueGoodTablePlugin from 'vue-good-table';
- 
+
 // import the styles 
 import 'vue-good-table/dist/vue-good-table.css'
- 
-Vue.use(VueGoodTablePlugin);
+
+
 
 
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 
 // components
+
+//authentications 
 import App from './components/auth/baseComponent.vue';
 import Logout from './components/auth/Logout.vue';
 import Register from './components/auth/Register.vue';
 import Login from './components/auth/Login.vue';
 
-import Table from './components/dashboard/Table.vue';
+//Dashboard
 import Dashboard from './components/dashboard/Dashboard.vue'; // only authenticated user get access to this 
+import Deposit from './components/dashboard/Deposit.vue'; // only authenticated user get access to this 
+import Withdraw from './components/dashboard/Withdraw.vue';
+import Transaction from './components/dashboard/Transaction.vue';
+import Table from './components/dashboard/Table.vue';
+
 
 /**
  * initializing the router 
@@ -47,8 +54,11 @@ import Dashboard from './components/dashboard/Dashboard.vue'; // only authentica
  * name : name of the router that we later direct to the corresponding router (see auth/baseComponent.vue)
  * component : the component that is associated with the route
  */
-
 Vue.use(VueRouter);
+Vue.use(VueCookie);
+Vue.use(require('vue-moment'));// to display on dashboard latest activities ex: 2 days ago dynamically 
+Vue.use(VueGoodTablePlugin);
+
 
 const router = new VueRouter({
     routes: [{
@@ -71,19 +81,45 @@ const router = new VueRouter({
             auth: false
         }
     }, {
-        path: '/dashboard:id',
+        path: '/dashboard',
         name: 'dashboard',
         component: Dashboard,
         meta: {
             auth: true // only authorized user
-        }},
-        {
-            path: '/logout',
-            name: 'logout',
-            component: Logout,
-            meta: {
-                auth: true // only authorized user
-            }
+        }
+    },
+
+    {
+        path: '/dashboard/deposit',
+        name: 'deposit',
+        component: Deposit,
+        meta: {
+            auth: true // only authorized user
+        }
+    },
+    {
+        path: '/dashboard/withdraw',
+        name: 'withdraw',
+        component: Withdraw,
+        meta: {
+            auth: true // only authorized user
+        }
+    },
+    {
+        path: '/dashboard/transaction',
+        name: 'transaction',
+        component: Transaction,
+        meta: {
+            auth: true // only authorized user
+        }
+    },
+    {
+        path: '/logout',
+        name: 'logout',
+        component: Logout,
+        meta: {
+            auth: true // only authorized user
+        }
     },
     {
         path: '/dashboard/history',
@@ -92,8 +128,8 @@ const router = new VueRouter({
         meta: {
             auth: true // only authorized user
         }
-}
-],
+    }
+    ],
     mode: 'history' // to have lean url without '#'
 });
 Vue.router = router
@@ -104,7 +140,6 @@ Vue.router = router
 Vue.use(VueAxios, axios);
 axios.defaults.baseURL = 'http://localhost:8000/api/';
 
-Vue.use(VueCookie);
 
 /**
  * setting up the security

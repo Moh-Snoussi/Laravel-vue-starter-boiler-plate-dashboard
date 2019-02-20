@@ -26,11 +26,15 @@ Route::group([
 
     Route::group([
         'middleware' => 'auth:api'
-    ], function () {
-        Route::get('logout', 'AuthController@logout');
-        Route::get('user', 'AuthController@user');
+    ], function () {// only authorized users
+        Route::get('logout', 'AuthController@logout');//logout
+        Route::get('user', 'AuthController@user');// getting the user object
         Route::get('refresh', 'AuthController@refresh'); // JWT refresh
-        Route::get('history', 'AccountActivity@index');
+        Route::get('dashboard', 'AccountActivity@dashboard');// dashboard
+        Route::post('activity', 'AccountActivity@depositAndWithdraw');// activity for deposit or with draw
+        Route::post('transaction', 'AccountActivity@transaction');// transacation
+        Route::post('cardchecker', 'AccountActivity@cardChecker');//check the card before transaction
+        Route::get('history', 'AccountActivity@index');// table proccessing
 
     });
 });

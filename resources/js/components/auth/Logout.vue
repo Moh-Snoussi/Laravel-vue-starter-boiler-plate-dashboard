@@ -6,13 +6,12 @@
 export default {
   mounted() {
     this.$auth.logout({
+      method: 'get',
+       url: "auth/logout", // logout from controller and revoke token from datbase
       makeRequest: true,
-      params: {}, // data: {} in axios
-      success: function() {},
-      error: function() {},
-      url: "api/auth/logout", // logout from controller and revoke token from datbase
       redirect: "/"
     });
+   
   }
 };
 </script>

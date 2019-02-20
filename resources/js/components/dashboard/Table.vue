@@ -1,23 +1,32 @@
+
+
+
 <template>
-  <div>
-    <dir style="margin-left:30px; z-index:-1000;">
-      <vue-good-table
-        style=" z-index:1;"
-        mode="remote"
-        @on-page-change="onPageChange"
-        @on-sort-change="onSortChange"
-        @on-per-page-change="onPerPageChange"
-        :row-style-class="rowStyleClass"
-        @on-search="searchField"
-        :sort-options="{
+  <!-- with v-cloak we hide the ugly {{}} on page load and show loading message as refereed bottom in the style deceleration   -->
+  <div style="margin-left:50px" v-cloak>
+    <mdb-container fluid>
+      <mdb-jumbotron>
+        <p class="lead">Search page.</p>
+        <hr class="my-2">
+        <p>Here you can search, paginate, if want to sort then click on the header of the column you want to sort.</p>
+
+        <vue-good-table
+          style=" z-index:1;"
+          mode="remote"
+          @on-page-change="onPageChange"
+          @on-sort-change="onSortChange"
+          @on-per-page-change="onPerPageChange"
+          :row-style-class="rowStyleClass"
+          @on-search="searchField"
+          :sort-options="{
     enabled: true,
   }"
-        :totalRows="totalRecords"
-        :search-options="{
+          :totalRows="totalRecords"
+          :search-options="{
     enabled: true,
     placeholder: 'Search this table',
   }"
-        :pagination-options="{
+          :pagination-options="{
     enabled: true,
     perPage: 7,
     position: 'bottom',
@@ -30,12 +39,15 @@
     pageLabel: 'page',
     allLabel: 'All',
   }"
-        :rows="rows"
-        :columns="columns"
-      />
-    </dir>
+          :rows="rows"
+          :columns="columns"
+        />
+      </mdb-jumbotron>
+    </mdb-container>
   </div>
 </template>
+      
+    
 
 <script>
 import { VueGoodTable } from "vue-good-table";
@@ -45,9 +57,50 @@ import { VueGoodTable } from "vue-good-table";
  * pagination, sorting and searching on server side
  */
 
+import {
+  mdbModal,
+  mdbModalHeader,
+  mdbModalBody,
+  mdbModalFooter,
+  mdbModalTitle,
+  mdbBadge,
+  mdbContainer,
+  mdbRow,
+  mdbCol,
+  mdbBtn,
+  mdbCard,
+  mdbCardTitle,
+  mdbCardText,
+  mdbCardBody,
+  mdbCardHeader,
+  mdbJumbotron,
+  mdbInput,
+  mdbTextarea,
+  mdbNumericInput
+} from "mdbvue";
+
 export default {
   components: {
-    VueGoodTable
+    VueGoodTable,
+    mdbContainer,
+    mdbRow,
+    mdbCol,
+    mdbBtn,
+    mdbCard,
+    mdbCardTitle,
+    mdbCardText,
+    mdbCardBody,
+    mdbCardHeader,
+    mdbJumbotron,
+    mdbInput,
+    mdbTextarea,
+    mdbNumericInput,
+    mdbModal,
+    mdbModalHeader,
+    mdbModalBody,
+    mdbModalFooter,
+    mdbModalTitle,
+    mdbBadge
   },
   data() {
     return {
@@ -57,26 +110,24 @@ export default {
           field: "created_at",
           type: "date",
           dateInputFormat: "YYYY-MM-DD HH:mm:ss",
-          dateOutputFormat: "MMM Do YY HH:mm"
+          dateOutputFormat: "MMM Do HH:mm"
         },
         {
           label: "Operation",
           field: "operation"
         },
         {
-          label: "Balance",
-          field: "currentBalance"
+          label: "Amount",
+          field: "amount"
+        },
+        {
+          label: "to/from",
+          field: "secondPartyName"
         },
         {
           label: "Reference",
           field: "reference"
         },
-
-        {
-          label: "to/from",
-          field: "secondPartyName"
-        },
-
         {
           label: "Card Number",
           field: "secondPartyCardNumber"
@@ -102,9 +153,10 @@ export default {
      * rowStyleClass to style rows depend on the operation
      * accepts the processed row
      * return class name same as the operation name
+     * this add a class name to the corresponding row
      */
     rowStyleClass(row) {
-      return row.operation; // to refer and style the corresponding row
+      return row.operation; //
     },
     /**
      * update filter parameters
@@ -141,8 +193,6 @@ export default {
      */
 
     onSortChange(params) {
-      console.log(params[0].type);
-
       this.updateParams({
         sort: {
           type: params[0].type,
@@ -153,7 +203,11 @@ export default {
     },
 
     /**
+     *
+     * getting all the data from the server
+     * the class associated with this work is in app/Http/Controller/AccountActivity.php index method
      * getting all component data and submitting it
+     *
      */
     // load items
     loadItems() {
@@ -173,7 +227,6 @@ export default {
         .then(response => {
           this.totalRecords = response.data.total;
           this.rows = response.data.data;
-          console.log(response.data.data);
         })
         .catch(function(error) {
           console.log(error);
@@ -210,22 +263,22 @@ table.vgt-table td {
   background-color: #f44336;
 }
 
-.transactionFrom {
+.TransactionFrom {
   background-color: #a5d6a7;
   color: black;
 }
 
-.transactionFrom:hover {
+.TransactionFrom:hover {
   background-color: #4caf50;
   color: white;
 }
 
-.transactionTo {
+.TransactionTo {
   background-color: #f48fb1;
   color: black;
 }
 
-.transactionTo:hover {
+.TransactionTo:hover {
   background-color: #e91e63;
 }
 </style>

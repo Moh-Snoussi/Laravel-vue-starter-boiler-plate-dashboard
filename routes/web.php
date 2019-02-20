@@ -19,7 +19,7 @@
  * env('PROVIDERS_CALL') will get the value from the .env file in the root folder
  */
 
-
+Route::get('logout', 'AuthController@logout');
 Route::get(env('PROVIDERS_CALL') . '{provider}', 'AuthController@redirectToProvider'); // social login redirection
 Route::get(env('PROVIDERS_REDIRECT') . '{provider}', 'AuthController@handleProviderCallback');// redirection from social provider this route have to match the provider callback on .inv and on api callback setup on provider platform
 

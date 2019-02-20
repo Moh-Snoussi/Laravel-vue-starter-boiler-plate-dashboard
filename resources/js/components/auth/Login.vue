@@ -10,35 +10,43 @@
         <section class="preview" style="margin-top:3rem;">
           <div class="alert alert-danger" v-if="errors.response.message">
             <p>There was an error:</p>
-            <p>- {{ errors.response.message }}<p>
-              <p v-if="errors.response.waitingMinutes">   - We only allow {{ errors.response.attempts }} attempts in {{ errors.response.waitingMinutes }} minutes .<p>
-             <p v-if="errors.response.details">   - {{errors.response.details}}.<p>
+            <p>- {{ errors.response.message }}</p>
+            <p></p>
+            <p
+              v-if="errors.response.waitingMinutes"
+            >- We only allow {{ errors.response.attempts }} attempts in {{ errors.response.waitingMinutes }} minutes .</p>
+            <p></p>
+            <p v-if="errors.response.details">- {{errors.response.details}}.</p>
             <p>Unable to complete log in.</p>
           </div>
 
           <form autocomplete="off" method="post" novalidate @submit="checkForm">
             <div style="margin-top:3rem;">
               <mdb-input
-              style="margin-bottom: -0.5rem"
+                style="margin-bottom: -0.5rem"
                 id="cardNumber"
                 v-model="cardNumber"
                 required
                 type="text"
                 label="Card number"
               />
-              <span
-                class="notValide"
-                v-if="errors.cardNumber"
-              >Your card number is required</span>
+              <span class="notValide" v-if="errors.cardNumber">Your card number is required</span>
             </div>
 
             <div style="margin-top:3rem;">
-              <mdb-input style="margin-bottom: -0.5rem" type="text" label="pin" id="pin" v-model="pin" required block/>
+              <mdb-input
+                style="margin-bottom: -0.5rem"
+                type="text"
+                label="pin"
+                id="pin"
+                v-model="pin"
+                required
+                block
+              />
               <span class="notValide" v-if="errors.pin">{{errors.pin}}</span>
             </div>
             <div class="custom-control custom-checkbox mb-3">
               <input
-              
                 type="checkbox"
                 v-model="rememberMe"
                 class="custom-control-input"
@@ -46,7 +54,11 @@
                 default
                 checked
               >
-              <label style="margin-top:3rem;" class="custom-control-label" for="customControlValidation1">remember me</label>
+              <label
+                style="margin-top:3rem;"
+                class="custom-control-label"
+                for="customControlValidation1"
+              >remember me</label>
             </div>
             <div class="text-center mt-5">
               <mdb-btn block id="loginbutton" color="primary" size="lg">
@@ -101,7 +113,7 @@ import {
   mdbRow,
   mdbBtn
 } from "mdbvue";
-import { async } from 'q';
+import { async } from "q";
 
 /**
  * Main logic
@@ -165,7 +177,7 @@ export default {
         redirect: "/dashboard", // if it reach here user has been granted access
         fetchUser: true
       });
-       // stop the loader
+      // stop the loader
     },
     /**
      * setting or deleting the cookies if user check remember me
@@ -195,27 +207,25 @@ export default {
      */
 
     isValid(cardOrPin) {
-      return cardOrPin == 'cardNumber' // if true returns will execute the next line of code for cardNumber validation
-        ?  !this.catchErrors(this.cardNumber) // cardOrPin is true,  check cardNumber if it is null to avoid Cannot read property of null errors
-        ? false // cardNumber is null return false validation and no errors
-        :   !isNaN(this.cardNumber.substring(0, 9)) // if cardNumber is not null and the first 9 characters are integers 
-            && // and
-            isNaN(this.cardNumber.substring(9, 13)) //  the last 4 characters are letters  
-            && // and 
+      return cardOrPin == "cardNumber" // if true returns will execute the next line of code for cardNumber validation
+        ? !this.catchErrors(this.cardNumber) // cardOrPin is true,  check cardNumber if it is null to avoid Cannot read property of null errors
+          ? false // cardNumber is null return false validation and no errors
+          : !isNaN(this.cardNumber.substring(0, 9)) && // if cardNumber is not null and the first 9 characters are integers // and
+            isNaN(this.cardNumber.substring(9, 13)) && //  the last 4 characters are letters // and
             this.cardNumber.length === 13 //  cardNumber length is 13 if code reach this line and find it true the cardNumber is valid
-        :   //cardOrPin is false,  check pin validation
-            !this.catchErrors(this.pin) // avoiding Cannot read property of null errors
-            ? false // pin is null return false validation and no errors
-        :   !isNaN(this.pin) // is pin a number
-            && // and 
-            this.pin.length == 4; //  pin length is 4 if code reach this line and find it true the pin is valid
-    },catchErrors(parameter){
-    try{
-   parameter.length;
-}catch(e){
-   return false
-}
-return true},
+        : //cardOrPin is false,  check pin validation
+        !this.catchErrors(this.pin) // avoiding Cannot read property of null errors
+        ? false // pin is null return false validation and no errors
+        : !isNaN(this.pin) && this.pin.length == 4; // is pin a number // and //  pin length is 4 if code reach this line and find it true the pin is valid
+    },
+    catchErrors(parameter) {
+      try {
+        parameter.length;
+      } catch (e) {
+        return false;
+      }
+      return true;
+    },
     /**
      * heckForm will prevent submitting the form and validate the pin and the card number
      */
@@ -224,39 +234,36 @@ return true},
       let valid = 0;
       // frond-end validation on submit
       event.preventDefault(); // prevent form from submitting
-      !this.isValid('cardNumber') // if cardNumber is not valid
-        ? (this.errors.cardNumber = "Your card number is invalid") 
+      !this.isValid("cardNumber") // if cardNumber is not valid
+        ? (this.errors.cardNumber = "Your card number is invalid")
         : (this.errors.cardNumber = "");
-      !this.isValid('pin') // if pin is not valid
+      !this.isValid("pin") // if pin is not valid
         ? (this.errors.pin = "Your pin is invalid")
         : !this.errors.cardNumber
         ? this.login()
         : (this.errors.pin = ""); // if(cardNumber isValid){if(pin isValid){return with form submission}else{pin error}}else{cardNumber error}
-  
     },
     welcomeMessage() {
       // customized welcome message that is displayed on login page
-      const registered =
-        this.catchErrors(this.email)
-          ? `Successfully registered, we send you credit card information to ${
-              this.email
-            } , please confirm your email and then login with your new pin and credit card.`
-          : "";
-      const welcome =
-        this.catchErrors(this.user) // avoiding Cannot read property of null errors
-          ? `Welcome back ${this.titleCase( // user already confirmed hes email we will display his name
-              this.user
-            )} Please use your credit card information to login.`
-          : "";
+      const registered = this.catchErrors(this.email)
+        ? `Successfully registered, we send you credit card information to ${
+            this.email
+          } , please confirm your email and then login with your new pin and credit card.`
+        : "";
+      const welcome = this.catchErrors(this.user) // avoiding Cannot read property of null errors
+        ? `Welcome back ${this.titleCase(
+            // user already confirmed hes email we will display his name
+            this.user
+          )} Please use your credit card information to login.`
+        : "";
       // tenary operation they are like if else (if ? ) and else(:)
       // we check if there is a confirmation query
 
-      return (this.infoMessage =
-        this.catchErrors(this.confirmed) // this way there will be no error if the variable is undefined
-          ? this.confirmed == 0
-            ? registered // 0 means didn't confirm fresh registered users will land here, the const message will get the infoMessage that we displayed a proper message to the user
-            : welcome // this is user is coming from email confirmation so we say welcome back
-          : this.infoMessage); // if nothing from the above condition is true then we dont change the public message
+      return (this.infoMessage = this.catchErrors(this.confirmed) // this way there will be no error if the variable is undefined
+        ? this.confirmed == 0
+          ? registered // 0 means didn't confirm fresh registered users will land here, the const message will get the infoMessage that we displayed a proper message to the user
+          : welcome // this is user is coming from email confirmation so we say welcome back
+        : this.infoMessage); // if nothing from the above condition is true then we dont change the public message
     },
     titleCase(str) {
       // to turn every first letter of every word capitalized used to display the users name
@@ -298,13 +305,13 @@ section.preview {
 #registert {
   display: "";
 }
-.notValide{
-    margin-bottom: 20px;
-    color: red;
-    font-size: 12px;
-    padding-top: 0px;
- 
-    margin-bottom: 20px;
+.notValide {
+  margin-bottom: 20px;
+  color: red;
+  font-size: 12px;
+  padding-top: 0px;
+
+  margin-bottom: 20px;
 }
 #loader {
   width: 20px;

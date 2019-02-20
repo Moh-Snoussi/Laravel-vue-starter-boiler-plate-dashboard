@@ -20,7 +20,7 @@
             }
         }
         &.active-item > .vsm-link, &.parent-active-item > .vsm-link {
-            box-shadow: 3px 0px 0px 0px $primaryColor inset;
+            box-shadow: 3px 0px 0px 0px #4285f4 inset;
             & > .vsm-icon {
                 color: $iconActiveColor;
                 background-color: $iconActiveBg;
@@ -29,7 +29,7 @@
     }
     &.rtl .vsm-item.first-item {
         &.active-item > .vsm-link, &.parent-active-item > .vsm-link {
-            box-shadow: -3px 0px 0px 0px $primaryColor inset;
+            box-shadow: -3px 0px 0px 0px #4285f4 inset;
         }
     }
     &.vsm-default {

@@ -14,21 +14,22 @@ class Transactions extends Migration
     public function up()
     {
         //
-        Schema::create('transactions', function (Blueprint $table){
-        $table->increments('id');
-        $table->timestamps();
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->timestamps();
             $table->string('cardNumber');
             $table->string('userId');
+            $table->string('name');
             $table->string('currentBalance');
             $table->string('operation');
             $table->string('secondPartyCardNumber')->nullable();
             $table->string('secondPartyName')->nullable();
             $table->string('amount');
-            $table->string('reference');
-            
-       
-        }
-    );
+            $table->string('reference')->nullable();
+            $table->index(['created_at']);
+
+
+        });
     }
 
     /**
