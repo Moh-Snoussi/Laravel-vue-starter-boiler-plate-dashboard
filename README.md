@@ -23,6 +23,7 @@ to install execute the following commands get the data on your machine.
 
    ```composer install```
 4. Install node dependencies
+
    ```npm install```
 5. Rename .env.example from the root diretory to .env
 

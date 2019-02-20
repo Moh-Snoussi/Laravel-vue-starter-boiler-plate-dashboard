@@ -34,6 +34,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.7.1",
     "@fortawesome/vue-fontawesome": "^0.1.5",
     "@myena/vue-table": "^0.7.4",
+    "@websanova/vue-auth": "^2.21.14-beta",
     "bootstrap-css-only": "^4.2.1",
     "dotenv": "^6.2.0",
     "echarts": "^4.1.0",
