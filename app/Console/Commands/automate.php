@@ -80,7 +80,7 @@ class automate extends Command
         $this->info('you can always change those settings from the .env file on the root folder');
         $this->info('');
         $this->info('in case you skip:');
-        $this->info('you need to follow those instructions.');
+        $this->info('you need to follow those instructions: https://github.com/Moh-Snoussi/Automated_Teller_Machine .');
         $this->info('');
         if ($this->confirm('press enter to continue auto assistance, or no to skip (default):', 'yes')) {
             if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -88,12 +88,23 @@ class automate extends Command
             } else {
                 system('clear');
             }
+            $this->info('<<<<<<<<<<<<<<<<<<<------COMPOSER----->>>>>>>>>>>>>>>>>>');
+            $this->info('composer install');
+            
+                $this->info('please wait node modules instalation');
+                passthru("composer install");
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                    system('cls');
+                } else {
+                    system('clear');
+                }
+            
             $this->info('<<<<<<<<<<<<<<<<<<<------NPM----->>>>>>>>>>>>>>>>>>');
             $this->info('npm install');
-            if ($this->confirm('do you confirm to install node modules? (default):', 'yes')) {
+           
                 $this->info('please wait node modules instalation');
                 passthru("npm install");
-            }
+            
             if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                 system('cls');
             } else {
