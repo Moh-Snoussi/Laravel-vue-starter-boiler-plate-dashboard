@@ -88,16 +88,7 @@ class automate extends Command
             } else {
                 system('clear');
             }
-            $this->info('<<<<<<<<<<<<<<<<<<<------COMPOSER----->>>>>>>>>>>>>>>>>>');
-            $this->info('composer install');
             
-                $this->info('please wait node modules instalation');
-                passthru("composer install");
-                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                    system('cls');
-                } else {
-                    system('clear');
-                }
             
             $this->info('<<<<<<<<<<<<<<<<<<<------NPM----->>>>>>>>>>>>>>>>>>');
             $this->info('npm install');
