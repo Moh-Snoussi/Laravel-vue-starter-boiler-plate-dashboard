@@ -3,7 +3,7 @@
 
 <template>
   <!-- with v-cloak we hide the ugly {{}} on page load and show loading message as refereed bottom in the style deceleration   -->
-  <div style="margin-left:50px" v-cloak>
+  <div style="margin-left:50px" v-cloak v-on:click="collapse">
     <mdb-container fluid>
       <mdb-jumbotron>
         <p class="lead">Search page.</p>
@@ -231,6 +231,14 @@ export default {
         .catch(function(error) {
           console.log(error);
         });
+    },
+    /**
+     * the following function will fire on a click at the body component
+     * will pass a collapse true
+     * the parent component (baseComponent) should accordingly and collapse the side menu
+     */
+    collapse() {
+      this.$router.push(`?collapse=true`);
     }
     /**
      * on page load request data from the server

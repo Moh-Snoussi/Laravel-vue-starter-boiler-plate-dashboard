@@ -13,7 +13,7 @@
         "google/apiclient": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
         "laravel/framework": "5.7.*",
-        "laravel/passport": "^7.1",
+        "laravel/passport": "^7.2",
         "laravel/socialite": "^3.2.0",
         "laravel/tinker": "^1.0"
     },
@@ -64,9 +64,9 @@
             "@php artisan key:generate --ansi"
         ],
         "post-install-cmd": [
-            "php artisan clear-compiled",
-            "php artisan optimize",
-            "php path/to/installer.php"
+            "php artisan clear-compiled"
+           
+           
         ]
        
     }

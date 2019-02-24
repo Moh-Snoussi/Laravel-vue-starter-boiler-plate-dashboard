@@ -18,6 +18,7 @@
       <sidebar-menu
         style="z-index: 10;"
         @collapse="handelCollapse()"
+        v-bind:collapsed="collapse"
         v-if="$auth.check()"
         :menu="menu"
       />
@@ -73,9 +74,6 @@ import {
 
 export default {
   name: "app",
-  data: {
-    collapse: false
-  },
 
   components: {
     mdbNavbar,
@@ -85,14 +83,17 @@ export default {
     mdbNavbarBrand,
     SidebarMenu
   },
+  props: ["collapsed"],
   data() {
     return {
+      bodyClick: 0,
+      collapse: true,
       week: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
       clock: {
         time: "",
         date: ""
       },
-      collapse: false,
+
       menu: [
         // assigning side bar data
         {
@@ -139,6 +140,19 @@ export default {
       ]
     };
   },
+  /**
+   * This function will watch the url on the route
+   * and pass the collapse value accordingly
+   * 
+   */
+  watch: {
+    $route: function() {
+     this.collapse = this.$route.query.collapse == "false" || this.$route.query.collapse == "true" ?
+      
+       this.$route.query.collapse !== "false" ? true : false : this.collapse ;
+      
+    }
+  },
   methods: {
     /**
      * getting the props from child component and assigned to this component data
@@ -146,6 +160,8 @@ export default {
      */
     handelCollapse() {
       this.collapse = !this.collapse;
+      console.log(this.dashboardCollapse);
+
       this.$router.push(`?collapse=${this.collapse}`);
     },
 

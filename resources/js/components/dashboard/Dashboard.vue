@@ -1,6 +1,6 @@
 <template>
   <!-- with v-cloak we hide the ugly {{}} on page load and show loading message as refereed bottom in the style deceleration   -->
-  <div style="margin-left:50px" v-cloak>
+  <div style="margin-left:50px" v-on:click="collapse" v-cloak>
     <mdb-container fluid>
       <mdb-jumbotron>
         <p class="lead">Welcome to dashboard.</p>
@@ -288,7 +288,14 @@ export default {
           // Set the cards information
           // format the date object in order to display ** minutes ago
           let t = response.data[0].created_at.split(/[- :]/);
-          this.lastActivity.date = new Date(t[0],t[1]-1,t[2],t[3],t[4],t[5]);
+          this.lastActivity.date = new Date(
+            t[0],
+            t[1] - 1,
+            t[2],
+            t[3],
+            t[4],
+            t[5]
+          );
           this.currentBalance = response.data[0].currentBalance;
           this.lastActivity.amount = response.data[0].amount;
           this.lastActivity.operation = response.data[0].operation;
@@ -302,9 +309,9 @@ export default {
           console.log(error);
         });
     },
-    /** 
+    /**
      * formating the date for the bar chart
-    */
+     */
     formatDate(date) {
       var monthNames = [
         "Jan",
@@ -325,10 +332,19 @@ export default {
       var monthIndex = date.getMonth();
 
       return day + " " + monthNames[monthIndex];
-    }
+    },
+ 
     /**
-     * on page load all the function
-     * Yes i know with web socket we will see the changes on the go
+     * the following function will fire on click in the body component will pass a collapse true
+     * that the parent component (baseComponent) act accordingly and collapse the side menu
+     */
+    collapse() {
+      this.$router.push(`?collapse=true`);
+    }
+   
+    /**
+     * on page load all the functions
+     * With web socket we will see the changes on the go
      */
   },
   mounted() {

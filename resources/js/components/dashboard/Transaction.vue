@@ -1,6 +1,6 @@
 <template>
   <!-- with v-cloak we hide the ugly {{}} on page load and show loading message as refereed bottom in the style deceleration   -->
-  <div style="margin-left:50px" v-cloak>
+  <div style="margin-left:50px" v-cloak v-on:click="collapse">
     <mdb-container fluid>
       <mdb-jumbotron>
         <form autocomplete="off" method="post" novalidate @submit="checkReceiversName">
@@ -298,6 +298,14 @@ export default {
               (this.errors.body = response.data.errors.body)); // clear submitted reference
         });
       // form not valid user didn't put any value
+    },
+    /**
+     * the following function will fire on a click at the body component
+     * will pass a collapse true
+     * the parent component (baseComponent) should accordingly and collapse the side menu
+     */
+    collapse() {
+      this.$router.push(`?collapse=true`);
     }
   }
 };
