@@ -1,14 +1,24 @@
 # Laravel and Vuejs authentication and dashboard REST Api
 
-<a href="https://codeclimate.com/github/codeclimate/codeclimate/maintainability"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability" /></a> <a href="https://codeclimate.com/github/codeclimate/codeclimate/test_coverage"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage" /></a>
-
-### Screenshots
-<a href="https://npmjs.org/package/badges" title="View this project on NPM" rel="nofollow"><img src="https://img.shields.io/npm/v/badges.svg" alt="NPM version"></a>
-
 <a href="https://ci.appveyor.com/api/projects/status/{{status_id}}" title="Building" rel="nofollow"><img src="https://ci.appveyor.com/api/projects/status/{{status_id}}g" alt="Building"></a>
 
-![log in screen](https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/logscreen.png)
-![dashboard](https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/dashboard.png)
+<a href="https://codeclimate.com/github/codeclimate/codeclimate/maintainability"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability" /></a>
+<a href="https://codeclimate.com/github/codeclimate/codeclimate/test_coverage"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage" /></a>
+
+<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/php.png" title="php">
+
+<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/node.png" title="nodejs">
+
+
+
+### Screenshots
+
+<p align="center">
+
+<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/dashboard.png" width="350" title="hover text">
+  <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/logscreen.png" width="350" alt="accessibility text">
+  </p>
+
 
  - Social or email registration 
  - Email verification 
