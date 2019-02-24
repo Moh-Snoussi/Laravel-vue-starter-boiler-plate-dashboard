@@ -83,9 +83,9 @@ class AuthController extends Controller
             return redirect(env('PROVIDERS_CALL' . $provider));
         }
         $user = User::query()->firstOrNew(['email' => $providerUser->getEmail()]);
-    // register (if no user)
-    // maybe we can set all the values on our user model if it is new... right now we only have name
-    // but you could set other things like avatar or gender
+        // register (if no user)
+        // maybe we can set all the values on our user model if it is new... right now we only have name
+        // but you could set other things like avatar or gender
         if (!$user->exists) {
             $user = new User([
                 'provider' => $provider,
@@ -168,9 +168,9 @@ class AuthController extends Controller
             $user->active = true; // delete activation token
             // users already confirmed will not get here because we will lear their activation token
             $user->activationToken = '';
-            $user->emailVerifiedAt = date('Y-m-d G:i:s');;  // clearing of activation token 
+            $user->emailVerifiedAt = date('Y-m-d G:i:s');  // clearing of activation token 
             $account = Account::where('user_id', $user['id'])->first(); // get the account associated with the user from the database
-            $account->Active = true;// user is active 
+            $account->Active = true; // user is active 
 
             $user->pin = $account->pin;
             $user->cardNumber = $account->cardNumber;
@@ -201,10 +201,10 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string',
             'rememberMe' => 'boolean'
-        ]);// login validation 
+        ]); // login validation 
         $credentials = request(['email', 'password']);
         if (!Auth::attempt($credentials))
-            return response()->json([
+        return response()->json([
             'message' => 'Unauthorized'
         ], 401);
         $user = $request->user();
@@ -218,7 +218,7 @@ class AuthController extends Controller
         $tokenResult = $user->createToken(env('JWT_SECRET', 'Personal Access Token'));
         $token = $tokenResult->token;
         if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
+        $token->expires_at = Carbon::now()->addWeeks(1);
         $token->save();
         return response()->json([
             'access_token' => $tokenResult->accessToken,
@@ -245,23 +245,26 @@ class AuthController extends Controller
             'pin' => 'required|string',
             'rememberMe' => 'boolean'
         ]); // validation
-        $user = User::where('cardNumber', $request->only(['cardNumber']))->first();// get the card code from request and check if the card code in database 
+        $user = User::where('cardNumber', $request->only(['cardNumber']))->first(); // get the card code from request and check if the card code in database 
         // check authentication    
         if ($user) {
-           
-        // card number where found
-        // comparing the hashed pin with the provided pin
+
+            // card number where found
+            // comparing the hashed pin with the provided pin
             if (password_verify(request(['pin'][0]), $user->pin)) {
-            // user authenticated 
+                // user authenticated 
+                $user->ipAddressOnLastLogin = serialize($request->getClientIps());
+                $user->deviceOnLastLogin = serialize($request->userAgent());
+                $user->comingFromBeforeLastLogin = serialize($request->header('HTTP_REFERER'));
+                $user->lastLoginDate = date('Y-m-d G:i:s');
                 $tokenResult = $user->createToken(env('JWT_SECRET', 'Personal Access Token')); // creating JWT
                 $token = $tokenResult->token;
                 $token->expires_at = Carbon::now()->addDays(1);
                 if ($request->remember_me)
-                    $token->expires_at = Carbon::now()->addWeeks(1); // adding one week if remember me 
+                $token->expires_at = Carbon::now()->addWeeks(1); // adding one week if remember me 
                 $token->save();
-                $user->ipAddressOnLastLogin = serialize($request->getClientIps());
-                $user->comingFromBeforeLogin = serialize($request->header('HTTP_REFERER'));
-                $user->deviceOnLastLogin = serialize($request->userAgent());
+                $user->save();
+
                 return response()->json([
                     'success' => [
                         'message' => 'Successfully logged in',
@@ -271,7 +274,7 @@ class AuthController extends Controller
                     ]
                 ], 200)->header('Authorization', $tokenResult->accessToken); // response success
             }
-        }// authorization failed
+        } // authorization failed
         // we check if user didn't confirm his email and provide a better error 
 
         $account = Account::where('cardNumber', $request->only(['cardNumber']))->first(); // we check if the card number is correct
@@ -280,18 +283,16 @@ class AuthController extends Controller
         return ($account && password_verify(request(['pin'][0]), $account->pin))
             ?
             response()->json([
-            'errors' => [
-                'message' => 'Awaiting confirmation.',
-                'details' => 'You may need to confirm your email.'
-            ]
-        ], 351)
-            :
-            response()->json([
-            'errors' => [
-                'message' => 'Unauthorized'
-            ]
-        ], 401);
-
+                'errors' => [
+                    'message' => 'Awaiting confirmation.',
+                    'details' => 'You may need to confirm your email.'
+                ]
+            ], 351)
+            : response()->json([
+                'errors' => [
+                    'message' => 'Unauthorized'
+                ]
+            ], 401);
     }
 
     /**
@@ -321,13 +322,13 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        auth('web')->logout();// forget token from cookie 
+        auth('web')->logout(); // forget token from cookie 
 
         return response()->json([
             'success' => [
                 'message' => 'Successfully logged out'
             ]
-        ], 205);// response success
+        ], 205); // response success
     }
-
 }
+

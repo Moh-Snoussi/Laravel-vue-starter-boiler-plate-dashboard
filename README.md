@@ -28,19 +28,22 @@ This is a basic SPA with stateless authentication uses JWT. user can login with 
 
 - Composer
 - Node
-- Database
-- Email credentials and server settings (you can get for free from https://mailtrap.io)
+- Database credentials and server configuration
+- Email credentials and server configuration (you can get for free from https://mailtrap.io)
 
 # Instalation
 ### One Command Installation
 
-1. Prepare your database, email credentials and settings.
 
-2. Open terminal and execute the following command:
+1. Open terminal and execute the following command:
 
    `git clone -b one_command_and_auto_assistance https://github.com/Moh-Snoussi/Automated_Teller_Machine && cd Automated_Teller_Machine && composer install && php artisan automate`
 
-3. Follow the instructions. 
+2. Follow the instructions. 
+
+3. To edit vue files and see the change on browser as soon as you save then open another terminal in the project directory and run:
+
+    ```npm run watch -- --watch-poll```
 
 ## Or
 ### Manual Installation

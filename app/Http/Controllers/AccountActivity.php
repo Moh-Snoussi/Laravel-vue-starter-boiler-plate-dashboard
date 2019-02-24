@@ -33,6 +33,8 @@ use App\Account;
 
 class AccountActivity extends Controller
 {
+    // with draw limit
+    private $limitWithDraw = -200;
 
     /**
      * dashboard
@@ -44,8 +46,8 @@ class AccountActivity extends Controller
      */
     public function dashboard(Request $request)
     {
-        $user = $request->user();// get the user from the request token
-        return Transaction::where('cardNumber', $user->cardNumber)->orderBy('created_at', 'desc')->get();//SQL query
+        $user = $request->user(); // get the user from the request token
+        return Transaction::where('cardNumber', $user->cardNumber)->orderBy('created_at', 'desc')->get(); //SQL query
     }
 
 
@@ -61,27 +63,26 @@ class AccountActivity extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();// get the user from the request token
+        $user = $request->user(); // get the user from the request token
 
-        $perPage = $request['perPage'];// get the how many result per page
-        $page = $request['page'];// get the requested page
+        $perPage = $request['perPage']; // get the how many result per page
+        $page = $request['page']; // get the requested page
         $search = json_decode($request['search'])->searchTerm; // get the search term if there is one
-        $sort = json_decode($request['sort']);// this object holds the type(asc or desc ) and the row that need to be sorted row 
-        
-        //check if searching and sorting at the same time
-        if (strlen($search) > 0 && strlen($sort->field) > 1) return (is_numeric(substr($search, 0, 3)) ? (Transaction::orderBy($sort->field, $sort->type)->where('cardNumber', $user->cardNumber)->where('secondPartyCardNumber', 'LIKE', '%' . $search . '%')->paginate($perPage))//SQL query
-        : (Transaction::orderBy($sort->field, $sort->type)->where('cardNumber', $user->cardNumber)->where('secondPartyName', 'LIKE', '%' . $search . '%')->paginate($perPage)));//SQL query
+        $sort = json_decode($request['sort']); // this object holds the type(asc or desc ) and the row that need to be sorted row 
 
-            // check if the user is searching 
+        //check if searching and sorting at the same time
+        if (strlen($search) > 0 && strlen($sort->field) > 1) return (is_numeric(substr($search, 0, 3)) ? (Transaction::orderBy($sort->field, $sort->type)->where('cardNumber', $user->cardNumber)->where('secondPartyCardNumber', 'LIKE', '%' . $search . '%')->paginate($perPage)) //SQL query
+            : (Transaction::orderBy($sort->field, $sort->type)->where('cardNumber', $user->cardNumber)->where('secondPartyName', 'LIKE', '%' . $search . '%')->paginate($perPage))); //SQL query
+
+        // check if the user is searching 
         else if (strlen($search) > 0) return
             is_numeric(substr($search, 0, 2)) ? (Transaction::where('cardNumber', $user->cardNumber)::where('secondPartyCardNumber', 'LIKE', '%' . $search . '%')->orderBy('created_at', 'desc')->paginate($perPage))
             : (Transaction::where('cardNumber', $user->cardNumber)->where('secondPartyName', 'LIKE', '%' . $search . '%')->paginate($perPage));
 
-             // check if sorting checked 
+        // check if sorting checked 
         else if (strlen($sort->field) > 1) return (Transaction::where('cardNumber', $user->cardNumber)->orderBy($sort->field, $sort->type)->orderBy('created_at', 'desc')->paginate($perPage));
         //if nothing of the above condition return a normal pagination
         else return Transaction::where('cardNumber', $user->cardNumber)->orderBy('created_at', 'desc')->paginate($perPage);
-
     }
 
 
@@ -99,7 +100,7 @@ class AccountActivity extends Controller
     {
         if ($request->user()) {
 
-//getting the data from the request 
+            //getting the data from the request 
             $user = $request->user();
             $newAmount = $request['amount'];
             $reference = $request['reference'];
@@ -121,12 +122,19 @@ class AccountActivity extends Controller
         $operation == 'withdraw' ? $newAmountx = -(int)$newAmount : $newAmountx = (int)$newAmount;
 
 
-// checking if the user is valid
-        if (isset($user)) {// get the last user row where we find his balance
+        // checking if the user is valid
+        if (isset($user)) { // get the last user row where we find his balance
             $latestRecords = Transaction::where('cardNumber', $user->cardNumber)->orderBy('created_at', 'desc')->first();
-// if the user have records in his account add or subtract other wise a new balance
+            // if the user have records in his account add or subtract otherwise create a new balance records
+           
             $updatedBalance = $latestRecords ? (int)$latestRecords['currentBalance'] + $newAmountx : $newAmountx;
-        } else {// user unauthorized
+            if($operation == 'withdraw' && (int)$updatedBalance < $this->limitWithDraw ){
+                return response()->json([
+                    'success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'Your balance reached the withdraw limit! withdraw limit : '. $this->limitWithDraw . '$. Your current balance : ' . (int)$latestRecords['currentBalance']  .'$.' ]
+                ], 270); 
+
+            }
+        } else { // user unauthorized
             return response()->json([
                 'errors' => [
                     'message' => 'Unauthorized'
@@ -134,7 +142,7 @@ class AccountActivity extends Controller
             ], 401);
         }
 
-// creating the Transaction object
+        // creating the Transaction object
 
         $Transaction = new Transaction([
             'name' => $user->name,
@@ -158,7 +166,7 @@ class AccountActivity extends Controller
 
     /**
      * transaction
-     * this method get the card number and the amount and create tow new row in the data base 
+     * this method get the card number, the amount and create tow new row in the data base 
      * one for the sender were we subtract the amount sent from his balance and save in a new row with new balance and the effected operation
      * the other is for the receiver we add the amount sent to his balance and save in a new row with new balance and the effected operation
      *
@@ -168,7 +176,7 @@ class AccountActivity extends Controller
      */
     public function transaction(Request $request)
     {
-        if ($request->user()) {// if user authenticated 
+        if ($request->user()) { // if user authenticated 
             // take the data from the request
             $user = $request->user();
             $sentAmount = $request['amount'];
@@ -178,15 +186,15 @@ class AccountActivity extends Controller
             $secondPartyName = $request['secondPartyName'];
 
 
-            if (strpos($operation, 'transaction') !== false) {// is this a valid transaction
+            if (strpos($operation, 'transaction') !== false) { // is this a valid transaction
                 // get the latest records of the sender and the receiver from database
                 $latestSenderRecords = Transaction::where('cardNumber', $user->cardNumber)->orderBy('created_at', 'desc')->first();
                 $latestReceiverRecords = Transaction::where('cardNumber', $secondPartyCardNumber)->orderBy('created_at', 'desc')->first();
-// adding to the receiver balance
+                // adding to the receiver balance
                 $updatedReceiverBalance = $latestReceiverRecords ? (int)$latestReceiverRecords->currentBalance + (int)$sentAmount : (int)$sentAmount;
                 // subtracting from the sender ballance
                 $updatedSenderBalance = $latestSenderRecords ? (int)$latestSenderRecords->currentBalance - (int)$sentAmount : -(int)$sentAmount;
-            } else {// this is not valid transaction
+            } else { // this is not valid transaction
                 return response()->json([
                     'errors' => [
                         'message' => 'Unauthorized'
@@ -194,7 +202,7 @@ class AccountActivity extends Controller
                 ], 401);
             }
 
-            // cecking if the sender have sufficient balance 
+            // checking if the sender have sufficient balance 
             if ($latestSenderRecords->currentBalance < $sentAmount) return response()->json([
                 'success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'Your balance is insufficient for such operation !']
             ], 270); // response 
@@ -203,13 +211,13 @@ class AccountActivity extends Controller
 
             // All fine transition will be proceeded
 
-// if the receiver have no records we get his data from the user table
+            // if the receiver have no records we get his data from the user table
             if (!$latestReceiverRecords)
-                $latestReceiverRecords = User::where('cardNumber', $secondPartyCardNumber)->first();
+            $latestReceiverRecords = User::where('cardNumber', $secondPartyCardNumber)->first();
 
 
 
-// Receiver new record Transaction
+            // Receiver new record Transaction
             $ReceiverNewColumn = new Transaction([
                 'cardNumber' => $secondPartyCardNumber,
                 'name' => $latestReceiverRecords->name,
@@ -240,19 +248,19 @@ class AccountActivity extends Controller
 
             return ($SenderNewColumn->save() && $ReceiverNewColumn->save()) ? // check if Transaction objects are inserted in the database
 
-            response()->json([// 
-                'success' => true, 'messages' => ['header' => 'Transaction succeeded', 'body' => 'You sent ' . $sentAmount . ' $ to ' . $latestReceiverRecords['name'] . ' successfully, you have now a total of ' . $updatedSenderBalance . '$ at your account']
-            ], 201) // success
-            : // or 
-            response()->json([
-                'success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'Transaction canceled']
-            ], 350); // error 
+                response()->json([ // 
+                    'success' => true, 'messages' => ['header' => 'Transaction succeeded', 'body' => 'You sent ' . $sentAmount . ' $ to ' . $latestReceiverRecords['name'] . ' successfully, you have now a total of ' . $updatedSenderBalance . '$ at your account']
+                ], 201) // success
+                : // or  response()->json([
+                    response()->json(['success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'Transaction canceled']
+                ], 350); // error 
         }
     }
 
     /**
      * cardChecker
      * check if the provider card number is valid
+     * and the sender has enough to send
      * this method executed before the transaction
      *
      * @param  mixed $request
@@ -264,23 +272,25 @@ class AccountActivity extends Controller
         //getting the request data
         $sender = $request->user();
         $receiver = $request['receiver'];
-        $checkReceiver = User::where('cardNumber', $receiver)->first();// checking if the card number exist
+        $amount = $request['amount'];
+        $checkReceiver = User::where('cardNumber', $receiver)->first(); // checking if the card number exist
+        $latestSenderRecords = Transaction::where('userId', $sender->id)->orderBy('created_at', 'desc')->first();
 
-        if ($sender->cardNumber == $receiver) return response()->json([// the provided card number is same as the sender ard number
+        if ((int)$latestSenderRecords->currentBalance < (int)$amount ) return response()->json([ // the provided card number is same as the sender ard number
+            'success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'Your balance is insufficient for such operation!']
+        ], 270); // response 
+
+        if ($sender->cardNumber == $receiver) return response()->json([ // the provided card number is same as the sender ard number
             'success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'The account you addressed is yours !']
         ], 270); // response 
 
         return $checkReceiver ? // found a card number
-        response()->json([// sending the name and details anout the transaction
-            'success' => true, 'messages' => ['header' => 'Please confirm', 'body' => 'You are about to send ' . $request['amount'] . ' $ to ' . $checkReceiver->name . '.']
-        ], 201)
-            : // else  error
-        response()->json([
-            'success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'The receiver credit card is not registered']
-        ], 270); // response 
-
+            response()->json([ // sending the name and details anout the transaction
+                'success' => true, 'messages' => ['header' => 'Please confirm', 'body' => 'You are about to send ' . $request['amount'] . ' $ to ' . $checkReceiver->name . '.']
+            ], 201)
+            : // else  error response()->json([
+                response()->json(['success' => false, 'errors' => ['header' => 'There was an error', 'body' => 'The receiver credit card is not registered']
+            ], 270); // response 
     }
-
-
-
 }
+

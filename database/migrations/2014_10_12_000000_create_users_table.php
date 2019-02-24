@@ -22,7 +22,6 @@ class CreateUsersTable extends Migration
             $table->timestamp('emailVerifiedAt')->nullable();
             $table->string('password')->nullable();
             $table->integer('role')->default(1);
-            $table->string('apiToken', 60)->nullable()->unique();
             $table->softDeletes();
             $table->boolean('active')->default(false);
             $table->string('activationToken')->nullable();
@@ -44,9 +43,7 @@ class CreateUsersTable extends Migration
             $table->string('givenName')->nullable();
             $table->string('familyName')->nullable();
             $table->string('token')->nullable();
-            $table->string('refreshToken')->nullable();
             $table->index('id');
-
         });
     }
 

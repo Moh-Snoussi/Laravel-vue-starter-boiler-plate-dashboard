@@ -14,6 +14,10 @@
                 <mdb-card-header :color="color">Withdraw</mdb-card-header>
                 <mdb-card-body>
                   <mdb-card-title>{{message}}</mdb-card-title>
+                   <div class="alert alert-danger" v-if="errors.body">
+                    <p>{{ errors.header }}</p>
+                    <p>- {{ errors.body }}</p>
+                  </div>
                   <div style="margin-top:3rem;max-width:20rem">
                     <mdb-input
                       v-model="amount"
@@ -123,8 +127,12 @@ export default {
       success: false,
       messages: {
         header: "",
-        body: ""
-      }
+        body: "",
+      },
+        errors:{
+          header:'',
+          body:''
+        }
     };
   },
   methods: {
@@ -170,11 +178,18 @@ export default {
               reference
             })
             .then(response => {
+              if (response.data.success) {
               this.messages.header = response.data.messages.header; // get the response header for modal header
               this.messages.body = response.data.messages.body; // response message for modal message
               this.success = true; // trigger modal with message
               this.amount = ""; // clear already submitted data
               this.reference = ""; // clear submitted reference
+              }else{
+              this.errors = response.data.errors;
+              console.log(this.errors);
+              }
+              
+
             })
         : ""; // form not valid user didn't put any value
     },

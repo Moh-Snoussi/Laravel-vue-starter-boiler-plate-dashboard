@@ -8,7 +8,8 @@
       <mdb-jumbotron>
         <p class="lead">Search page.</p>
         <hr class="my-2">
-        <p>Here you can search, paginate, if want to sort then click on the header of the column you want to sort.</p>
+        <p>Here you can search, paginate, and sort.</p>
+        <p>To sort click on the header of the column.</p>
 
         <vue-good-table
           style=" z-index:1;"

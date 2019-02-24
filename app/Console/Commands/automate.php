@@ -31,6 +31,10 @@ class automate extends Command
         parent::__construct();
     }
 
+    /**
+     * function to set environment variables from .env.example to a new .env
+     */
+
     public function setEnvironmentValue(array $values)
     {
 
@@ -63,6 +67,7 @@ class automate extends Command
 
     /**
      * Execute the console command.
+     * the following code is self explanatory
      *
      * @return mixed
      */
@@ -80,7 +85,7 @@ class automate extends Command
         $this->info('you can always change those settings from the .env file on the root folder');
         $this->info('');
         $this->info('in case you skip:');
-        $this->info('you need to follow those instructions: https://github.com/Moh-Snoussi/Automated_Teller_Machine for manual instalation.');
+        $this->info('you need to follow the instructions on: https://github.com/Moh-Snoussi/Automated_Teller_Machine for manual instalation.');
         $this->info('');
         if ($this->confirm('press enter to continue auto assistance, or type no to skip (default):', 'yes')) {
             if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -114,6 +119,11 @@ class automate extends Command
             $this->info('this step will create a new .env file in the root folder of the project.');
             $this->info('if there is already an .env file in the root folder it will be overwritten.');
             if ($this->confirm('press enter to setup a new .env file with database,email,socialite settings, or type no to skip (default):', 'yes')) {
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                    system('cls');
+                } else {
+                    system('clear');
+                }
                 $this->info('<<<<<<<<<<<<<<<<<<<------DATABASE----->>>>>>>>>>>>>>>>>>');
                 $this->info('database configuration');
                 $this->info('you will be asked to enter database host, username, password...');
@@ -123,9 +133,29 @@ class automate extends Command
                     } else {
                         system('clear');
                     }
+                    $this->info('setting up database driver');
+                    $this->info('type your database driver');
+                    $this->info('you can always change those settings from the .env file on the root folder');
+
+                    $database = $this->choice(
+                        'Which database driver are you using',
+                        ['mysql', 'mariadb', 'sqlite', 'pgsql', 'sqlsrv']
+                    );
+                    if ($database == 'mariadb') {
+                        $database = 'mysql';
+                    }
+                    $this->setEnvironmentValue(['DB_CONNECTION' => $database]);
+
+                    $this->info('database driver is set to ' . $database);
+
+                    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                        system('cls');
+                    } else {
+                        system('clear');
+                    }
 
                     $this->info('setting up database host');
-                    $this->info('type new host or press enter to keep default');
+                    $this->info('type database host or press enter to keep default');
                     $this->info('you can always change those settings from the .env file on the root folder');
                     $db = $this->ask('Database host (default):', '127.0.0.1');
 
@@ -144,7 +174,7 @@ class automate extends Command
                     $this->info('setting database port');
 
                     $this->info('you can always change those settings from the .env file on the root folder ');
-                    $this->info('type new port or press enter to keep default');
+                    $this->info('type your database port or press enter to keep default');
 
                     $db = $this->ask('Database port (default):', '3306');
 
@@ -160,7 +190,7 @@ class automate extends Command
 
                     $this->info('setting database name');
                     $this->info('you can always change those settings from the .env file on the root folder');
-                    $this->info('type new name or press enter to keep default');
+                    $this->info('type your database name or press enter to keep default');
 
                     $db = $this->ask('Database name (default):', 'ATMDB');
 
@@ -319,16 +349,15 @@ class automate extends Command
 
                     $this->setEnvironmentValue(['MAIL_ENCRYPTION' => $db]);
                     $this->info('email ecryption is set to ' . $db);
-
-                    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                        system('cls');
-                    } else {
-                        system('clear');
-                    }
+                }
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                    system('cls');
+                } else {
+                    system('clear');
                 }
 
 
-                if ($this->confirm('do you want to set up sign in with social Companies', 'no')) {
+                if ($this->confirm('(optional) do you want to set up sign in with social Companies', 'no')) {
                     $this->info('<<<<<<<<<<<<<<<<<<<------SOCIALITE----->>>>>>>>>>>>>>>>>>');
                     $this->info('<<<<<<<<<<<<<<<<<<<------GOOGLE----->>>>>>>>>>>>>>>>>>');
                     $this->info('set sign in with google');
@@ -452,9 +481,6 @@ class automate extends Command
                     }
                 }
             }
-            $this->info('executing composer require laravel/passport');
-            $this->info('please wait');
-            passthru('composer require laravel/passport');
             $this->info('running migration');
             $this->info('please wait');
             passthru('php artisan migrate');
