@@ -241,7 +241,7 @@ export default {
      * the response is proceeded and set the data of this component accordingly.
      */
     loadItems() {
-      // variable delations
+      // variable deletions
       var totalDeposit = 0,
         totalWithdraw = 0,
         totalTransactionFrom = 0,

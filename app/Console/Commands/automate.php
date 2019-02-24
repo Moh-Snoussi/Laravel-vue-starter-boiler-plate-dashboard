@@ -313,7 +313,7 @@ class automate extends Command
             }
 
 
-
+            if ($this->confirm('do you want to set up sign in with social Companies', 'no')) {
             $this->info('<<<<<<<<<<<<<<<<<<<------SOCIALITE----->>>>>>>>>>>>>>>>>>');
             $this->info('<<<<<<<<<<<<<<<<<<<------GOOGLE----->>>>>>>>>>>>>>>>>>');
             $this->info('set sign in with google');
@@ -435,6 +435,7 @@ class automate extends Command
                     system('clear');
                 }
             }
+        }
             $this->info('executing composer require laravel/passport');
             $this->info('please wait');
             passthru('composer require laravel/passport');

@@ -321,9 +321,7 @@ export default {
 .jumbotron {
   padding: 15px;
 }
-main {
-  margin-top: 15px !important;
-}
+
 </style>
 
 

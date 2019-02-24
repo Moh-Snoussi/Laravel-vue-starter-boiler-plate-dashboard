@@ -1,16 +1,43 @@
-# Laravel and Vuejs REST Api, 
-### 
+# Laravel and Vuejs authentication and dashboard REST Api
+
+<a href="https://codeclimate.com/github/codeclimate/codeclimate/maintainability"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability" /></a> <a href="https://codeclimate.com/github/codeclimate/codeclimate/test_coverage"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage" /></a>
+
+### Screenshots
+<a href="https://npmjs.org/package/badges" title="View this project on NPM" rel="nofollow"><img src="https://img.shields.io/npm/v/badges.svg" alt="NPM version"></a>
+
+<a href="https://ci.appveyor.com/api/projects/status/{{status_id}}" title="Building" rel="nofollow"><img src="https://ci.appveyor.com/api/projects/status/{{status_id}}g" alt="Building"></a>
+
+![log in screen](https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/logscreen.png)
+![dashboard](https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/dashboard.png)
+
  - Social or email registration 
  - Email verification 
  - Login and authentication 
  - Dashboard  
 
 This is a basic SPA with stateless authentication uses JWT. user can login with google, facebook or github, they register with name and email , then they get an email with card code, PIN and a confirmation button, as soon as they confirm we direct them to login site where they can login with the card number and the pin. if authenticated they land on a dashboard.
+## Requirements
 
+- Composer
+- Node
+- Database
+- Email credentials and server settings (you can get for free from https://mailtrap.io)
 
-## Installation
+# Instalation
+### One Command Installation
 
-to install execute the following commands get the data on your machine.
+1. Prepare your database, email credentials and settings.
+
+2. Open terminal and execute the following command:
+
+   `git clone -b one_command_and_auto_assistance https://github.com/Moh-Snoussi/Automated_Teller_Machine && cd Automated_Teller_Machine && composer install && php artisan automate`
+
+3. Follow the instructions. 
+
+## Or
+### Manual Installation
+
+to install open terminal and execute the following commands:
 
 1. Clone or download this repository
 
