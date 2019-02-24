@@ -314,14 +314,14 @@ class automate extends Command
                     }
 
 
-                    $this->info('setting database email from');
+                    $this->info('setting email from');
                     $this->info('you can always change those settings from the .env file on the root folder');
                     $this->info('email from');
 
-                    $db = $this->ask('Please enter the adress that we send the email');
+                    $db = $this->ask('Please enter the address that send the email');
 
                     $this->setEnvironmentValue(['MAIL_FROM_ADDRESS' => $db]);
-                    $this->info('database email adress is set to ' . $db);
+                    $this->info('email address is set to ' . $db);
 
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                         system('cls');
@@ -334,7 +334,7 @@ class automate extends Command
                     $this->info('Password');
                     $db = $this->ask('email password');
 
-                    $this->setEnvironmentValue(['MAIL_FROM_ADDRESS' => $db]);
+                    $this->setEnvironmentValue(['MAIL_PASSWORD' => $db]);
                     $this->info('email password is set to ' . $db);
 
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -342,13 +342,13 @@ class automate extends Command
                     } else {
                         system('clear');
                     }
-                    $this->info('setting email ecryption');
+                    $this->info('setting email encryption');
                     $this->info('you can always change those settings from the .env file on the root folder');
-                    $this->info('ecryption');
+                    $this->info('encryption');
                     $db = $this->ask('email encryption (default):', 'null');
 
                     $this->setEnvironmentValue(['MAIL_ENCRYPTION' => $db]);
-                    $this->info('email ecryption is set to ' . $db);
+                    $this->info('email encryption is set to ' . $db);
                 }
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                     system('cls');
@@ -378,7 +378,7 @@ class automate extends Command
 
 
                         $this->setEnvironmentValue(['GOOGLE_CLIENT_ID' => $db]);
-                        $this->info('google lient id is set to ' . $db);
+                        $this->info('google client id is set to ' . $db);
 
 
 
@@ -409,7 +409,7 @@ class automate extends Command
 
 
                         $this->setEnvironmentValue(['GITHUB_CLIENT_ID' => $db]);
-                        $this->info('github lient id is set to ' . $db);
+                        $this->info('github client id is set to ' . $db);
 
 
 
@@ -439,7 +439,7 @@ class automate extends Command
 
 
                         $this->setEnvironmentValue(['FACEBOOK_CLIENT_ID' => $db]);
-                        $this->info('facebook lient id is set to ' . $db);
+                        $this->info('facebook client id is set to ' . $db);
 
 
 
@@ -469,7 +469,7 @@ class automate extends Command
 
 
                         $this->setEnvironmentValue(['TWITTER_CLIENT_ID' => $db]);
-                        $this->info('twitter lient id is set to ' . $db);
+                        $this->info('twitter client id is set to ' . $db);
 
 
 
@@ -488,9 +488,10 @@ class automate extends Command
             $this->info('registering passport');
             $this->info('please wait');
             passthru('php artisan passport:install');
-            $this->info('clearing cach');
+            $this->info('clearing cache');
             $this->info('please wait');
-            passthru('php artisan cach:clear');
+            passthru('php artisan cache:clear');
+            passthru('php artisan config:clear');
 
 
             $this->info('lunching the server');
