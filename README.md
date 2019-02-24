@@ -5,9 +5,7 @@
 <a href="https://codeclimate.com/github/codeclimate/codeclimate/maintainability"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability" /></a>
 <a href="https://codeclimate.com/github/codeclimate/codeclimate/test_coverage"><img src="https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage" /></a>
 
-<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/php.png" title="php">
-
-<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/node.png" title="nodejs">
+<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/php.png" title="php"> <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/ecmascript.png" title="ECMASCRIPT"> <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/node.png" title="nodejs"> <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/composer.png" title="composer"> <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/larvel.png" title="laravel"> <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/vue.png" title="vuejs">
 
 
 
@@ -15,7 +13,7 @@
 
 <p align="center">
 
-<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/dashboard.png" width="350" title="hover text">
+<img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/dashboard.png" width="350" title="hover text"> 
   <img src="https://raw.githubusercontent.com/Moh-Snoussi/Automated_Teller_Machine/one_command_and_auto_assistance/public/images/logscreen.png" width="350" alt="accessibility text">
   </p>
 
