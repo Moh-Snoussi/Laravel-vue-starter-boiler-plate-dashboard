@@ -15,15 +15,9 @@ class Accounts extends Migration
     {
         //
         Schema::create('accounts', function (Blueprint $table) {
-            $table->increments('account_id');
             $table->string('user_id');
             $table->string('cardNumber')->unique();
             $table->string('pin');
-            $table->integer('amount');
-            $table->boolean('Active')->default(false);
-            $table->timestamps();
-            
-
         });
     }
 

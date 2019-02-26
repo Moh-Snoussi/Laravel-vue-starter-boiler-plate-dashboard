@@ -1,6 +1,6 @@
 <template>
   <!-- with v-cloak we hide the ugly {{}} on page load and show loading message as refereed bottom in the style deceleration   -->
-  <div style="margin-left:50px" v-cloak v-on:click="collapse">
+  <div style="margin-left:50px" v-cloak>
     <mdb-container fluid>
       <mdb-jumbotron>
         <form autocomplete="off" method="post" novalidate @submit="submitInput">
@@ -130,11 +130,7 @@ export default {
   },
   methods: {
     /**
-     * The following function returns color that depends on the user current balance
-     * more then 100$ purple gradient
-     * more then 0 yellow gradient
-     * else red gradient
-     *
+     * The following function changes the color and the headline depend on the user input
      */
     handleInput() {
       console.log(this.amount);
@@ -178,14 +174,6 @@ export default {
             })
         : ""; // form not valid user didn't put any value
     }
-    /**
-     * the following function will fire on a click at the body component
-     * will pass a collapse true
-     * the parent component (baseComponent) should accordingly and collapse the side menu
-     */,
-    collapse() {
-      this.$router.push(`?collapse=true`);
-    }
   }
 };
 </script>
@@ -200,7 +188,6 @@ export default {
 .jumbotron {
   padding: 15px;
 }
-
 </style>
 
 

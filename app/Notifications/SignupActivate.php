@@ -96,8 +96,7 @@ class SignupActivate extends Notification
 
             'user_id' => $notifiable->id,
             'cardNumber' => $this->CARD_N(),
-            'pin' => bcrypt($pin),
-            'amount' => 300
+            'pin' => bcrypt($pin)
         ]); // account table
 
         $account->save();// saving card information in database

@@ -22,7 +22,7 @@ export default {
     };
   },
   /**
-   * watch the url on the route 
+   * watch the url on the route
    * assign collapse on url change
    * main purpose:
    * let the avatar be rounded and add margin space if collapse is false
@@ -30,7 +30,7 @@ export default {
    */
   watch: {
     $route: function() {
-      this.collapse =  String(this.$parent.collapsed);
+      this.collapse = String(this.$parent.collapsed);
     }
   },
 
@@ -44,10 +44,8 @@ export default {
     }
   },
   mounted() {
-    this.$parent.menu[1].title = this.$auth.user().name;// add the name of the user under the avatar the parent is (baseComponent)
-    this.collapse = this.$parent.collapsed; // initial value of collapse is taken from the parent component(baseComponent) 
-    
-    
+    this.$parent.menu[1].title = this.$auth.user().name; // add the name of the user under the avatar the parent is (baseComponent)
+    this.collapse = this.$parent.collapsed; // initial value of collapse is taken from the parent component(baseComponent)
   }
 };
 </script>

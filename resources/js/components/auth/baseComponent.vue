@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="flyout">
+  <div id="app" class="flyout" v-on:click.stop="handelCollapse(true)">
     <div v-if="!$auth.ready()">
       Loading
       <object id="loader" data="svg/circles.svg"></object>
@@ -143,14 +143,17 @@ export default {
   /**
    * This function will watch the url on the route
    * and pass the collapse value accordingly
-   * 
+   *
    */
   watch: {
     $route: function() {
-     this.collapse = this.$route.query.collapse == "false" || this.$route.query.collapse == "true" ?
-      
-       this.$route.query.collapse !== "false" ? true : false : this.collapse ;
-      
+      this.collapse =
+        this.$route.query.collapse == "false" ||
+        this.$route.query.collapse == "true"
+          ? this.$route.query.collapse !== "false"
+            ? true
+            : false
+          : this.collapse;
     }
   },
   methods: {
@@ -158,10 +161,8 @@ export default {
      * getting the props from child component and assigned to this component data
      * editing the url to handel menu collapse from other component qs yell
      */
-    handelCollapse() {
-      this.collapse = !this.collapse;
-      console.log(this.dashboardCollapse);
-
+    handelCollapse(close = false) {
+      close ? (this.collapse = true) : (this.collapse = !this.collapse);
       this.$router.push(`?collapse=${this.collapse}`);
     },
 

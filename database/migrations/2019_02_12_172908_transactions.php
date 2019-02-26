@@ -27,8 +27,6 @@ class Transactions extends Migration
             $table->string('amount');
             $table->string('reference')->nullable();
             $table->index(['created_at']);
-
-
         });
     }
 

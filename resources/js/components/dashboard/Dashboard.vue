@@ -1,6 +1,6 @@
 <template>
   <!-- with v-cloak we hide the ugly {{}} on page load and show loading message as refereed bottom in the style deceleration   -->
-  <div style="margin-left:50px" v-on:click="collapse" v-cloak>
+  <div style="margin-left:50px" v-cloak>
     <mdb-container fluid>
       <mdb-jumbotron>
         <p class="lead">Welcome to dashboard.</p>
@@ -332,16 +332,8 @@ export default {
       var monthIndex = date.getMonth();
 
       return day + " " + monthNames[monthIndex];
-    },
- 
-    /**
-     * the following function will fire on click in the body component will pass a collapse true
-     * that the parent component (baseComponent) act accordingly and collapse the side menu
-     */
-    collapse() {
-      this.$router.push(`?collapse=true`);
     }
-   
+
     /**
      * on page load all the functions
      * With web socket we will see the changes on the go
