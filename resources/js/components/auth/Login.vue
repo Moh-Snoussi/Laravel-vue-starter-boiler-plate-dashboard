@@ -14,7 +14,7 @@
             <p></p>
             <p
               v-if="errors.response.waitingMinutes"
-            >- We only allow {{ errors.response.attempts }} attempts in {{ errors.response.waitingMinutes }} minutes .</p>
+            >- Exceeded the allowed attempts please try again later.</p>
             <p></p>
             <p v-if="errors.response.details">- {{errors.response.details}}.</p>
             <p>Unable to complete log in.</p>
