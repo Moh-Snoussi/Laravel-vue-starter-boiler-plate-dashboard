@@ -1,4 +1,4 @@
-# Laravel and Vuejs authentication and dashboard REST Api
+# Laravel - Vuejs authentication and dashboard REST Api
 
 <a href="https://ci.appveyor.com/api/projects/status/{{status_id}}" title="Building" rel="nofollow"><img src="https://ci.appveyor.com/api/projects/status/{{status_id}}g" alt="Building"></a>
 
