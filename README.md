@@ -37,7 +37,7 @@ This is a basic SPA with stateless authentication uses JWT. user can login with 
 
 1. Open terminal and execute the following command:
 
-   `git clone -b one_command_and_auto_assistance https://github.com/Moh-Snoussi/Automated_Teller_Machine && cd Automated_Teller_Machine && composer install && php artisan automate`
+   `git clone -b one_command_and_auto_assistance https://github.com/Moh-Snoussi/Laravel-vue-starter-boiler-plate-dashboard && cd Laravel-vue-starter-boiler-plate-dashboard && composer install && php artisan automate`
 
 2. Follow the instructions. 
 
