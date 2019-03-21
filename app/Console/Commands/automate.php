@@ -85,7 +85,7 @@ class automate extends Command
         $this->info('you can always change those settings from the .env file on the root folder');
         $this->info('');
         $this->info('in case you skip:');
-        $this->info('you need to follow the instructions on: https://github.com/Moh-Snoussi/Automated_Teller_Machine for manual instalation.');
+        $this->info('you need to follow the instructions on: https://github.com/Moh-Snoussi/Laravel-vue-starter-boiler-plate-dashboard for manual instalation.');
         $this->info('');
         if ($this->confirm('press enter to continue auto assistance, or type no to skip (default):', 'yes')) {
             if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
